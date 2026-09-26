@@ -9,3 +9,6 @@ __pycache__/
 *.db-shm
 /runs.db
 /evals/ci/
+/traces/ci_gate_run.jsonl
+/traces/eval_run.jsonl
+/traces/run.jsonl

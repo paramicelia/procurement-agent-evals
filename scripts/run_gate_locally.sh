@@ -21,12 +21,15 @@ q030_clarify_price_band q031_clarify_price_band q035_escalate_price q036_escalat
 q043_escalate_conflict q044_escalate_conflict q049_escalate_unknown_item q050_escalate_unknown_item \
 q055_escalate_injection q056_escalate_injection"
 
+# Writes to traces/ci_gate_run.jsonl (gitignored, rewritten every run), not
+# the committed traces/ci_gate.jsonl example — see that file's own note.
+rm -f traces/ci_gate_run.jsonl
 python evals/run_eval.py \
   --provider cassette \
   --cassette evals/cassettes/ci_subset.jsonl \
   --ids $IDS \
   --out evals/ci \
-  --trace traces/ci_gate.jsonl \
+  --trace traces/ci_gate_run.jsonl \
   --tag ci_subset
 
 echo
