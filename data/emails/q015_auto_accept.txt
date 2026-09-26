@@ -1,0 +1,7 @@
+On Tue, buyer wrote:
+> Could you confirm pricing for the attached RFQ?
+
+Pacific Circuit Works <fatima.haddad@pacific.example>:
+Sure — see updated pricing below.
+  1000 x 10k Ohm Resistor 0805 @ 0.02 EUR
+Total: 20.00 EUR

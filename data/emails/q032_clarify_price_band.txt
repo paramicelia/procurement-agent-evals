@@ -1,0 +1,10 @@
+Subject: RFQ-5346 — Quote from Meridian Parts Trading
+
+Meridian Parts Trading
+
+| Item | Qty | Unit Price | Line Total |
+|---|---|---|---|
+| 8mm Aluminum Panel | 1000 | 2639 | 2639000 |
+
+Total: JPY 2639000
+Payment terms: 30 days net.

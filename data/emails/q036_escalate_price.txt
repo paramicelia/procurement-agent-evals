@@ -1,0 +1,11 @@
+Subject: RFQ-4548 — Quote from Cascade Hardware Co
+
+Cascade Hardware Co
+
+| Item | Qty | Unit Price | Line Total |
+|---|---|---|---|
+| M4 Pan Head Screw | 500 | 13 | 6500 |
+| USB-C Cable 1m | 500 | 581 | 290500 |
+
+Total: JPY 297000
+Payment terms: 30 days net.

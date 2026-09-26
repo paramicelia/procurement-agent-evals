@@ -1,0 +1,11 @@
+Subject: RFQ-8500 — Quote from Falcon Precision Parts
+
+Falcon Precision Parts
+
+| Item | Qty | Unit Price | Line Total |
+|---|---|---|---|
+| M4 Pan Head Screw | 500 | 0.05 | 25.00 |
+| Steel L-Bracket | 100 | 1.75 | 175.00 |
+
+Total: EUR 254.95
+Payment terms: 30 days net.

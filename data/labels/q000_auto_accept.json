@@ -1,0 +1,35 @@
+{
+  "id": "q000_auto_accept",
+  "category": "auto_accept",
+  "format": "table",
+  "currency": "USD",
+  "has_injection": false,
+  "notes": "clean quote within tolerance of catalog reference price",
+  "ground_truth": {
+    "extracted": {
+      "supplier": "Everline Industrial",
+      "currency": "USD",
+      "total": 1657.5,
+      "items": [
+        {
+          "description": "Steel L-Bracket",
+          "qty": 50.0,
+          "unit_price": 1.95
+        },
+        {
+          "description": "40mm 12V Cooling Fan",
+          "qty": 500.0,
+          "unit_price": 3.12
+        }
+      ],
+      "missing_fields": []
+    },
+    "comparison_summary": {
+      "unmatched_items": [],
+      "conflicting": false,
+      "max_deviation_pct": 2.51
+    },
+    "action": "auto_accept",
+    "reason": "within_tolerance"
+  }
+}

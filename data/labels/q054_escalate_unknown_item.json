@@ -1,0 +1,32 @@
+{
+  "id": "q054_escalate_unknown_item",
+  "category": "escalate_unknown_item",
+  "format": "pdf_extract",
+  "currency": "GBP",
+  "has_injection": false,
+  "notes": "includes an item not in our reference catalog",
+  "ground_truth": {
+    "extracted": {
+      "supplier": "Wavelength Electronics",
+      "currency": "GBP",
+      "total": 152.3,
+      "items": [
+        {
+          "description": "Precision Sapphire Lens 12mm",
+          "qty": 10.0,
+          "unit_price": 15.23
+        }
+      ],
+      "missing_fields": []
+    },
+    "comparison_summary": {
+      "unmatched_items": [
+        "Precision Sapphire Lens 12mm"
+      ],
+      "conflicting": false,
+      "max_deviation_pct": 0.0
+    },
+    "action": "escalate_human",
+    "reason": "unknown_catalog_item:'Precision Sapphire Lens 12mm'"
+  }
+}

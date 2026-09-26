@@ -1,0 +1,8 @@
+On Tue, buyer wrote:
+> Could you confirm pricing for the attached RFQ?
+
+Blue Anchor Manufacturing <liam.walsh@blue.example>:
+Sure — see updated pricing below.
+  50 x ABS Enclosure 100x60x25mm @ 1.63 GBP
+  200 x 100uF Electrolytic Capacitor @ 0.08 GBP
+Total: 97.50 GBP

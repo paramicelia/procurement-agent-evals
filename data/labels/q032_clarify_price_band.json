@@ -1,0 +1,30 @@
+{
+  "id": "q032_clarify_price_band",
+  "category": "clarify_price_band",
+  "format": "table",
+  "currency": "JPY",
+  "has_injection": false,
+  "notes": "price 9-19% above catalog reference: within the clarify band",
+  "ground_truth": {
+    "extracted": {
+      "supplier": "Meridian Parts Trading",
+      "currency": "JPY",
+      "total": 2639000.0,
+      "items": [
+        {
+          "description": "8mm Aluminum Panel",
+          "qty": 1000.0,
+          "unit_price": 2639.0
+        }
+      ],
+      "missing_fields": []
+    },
+    "comparison_summary": {
+      "unmatched_items": [],
+      "conflicting": false,
+      "max_deviation_pct": 11.02
+    },
+    "action": "request_clarification",
+    "reason": "price_above_reference_11.0pct"
+  }
+}

@@ -1,0 +1,11 @@
+Subject: RFQ-4357 — Quote from Everline Industrial
+
+Everline Industrial
+
+| Item | Qty | Unit Price | Line Total |
+|---|---|---|---|
+| Steel L-Bracket | 50 | 1.95 | 97.50 |
+| 40mm 12V Cooling Fan | 500 | 3.12 | 1560.00 |
+
+Total: USD 1657.50
+Payment terms: 30 days net.

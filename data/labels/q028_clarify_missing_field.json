@@ -1,0 +1,32 @@
+{
+  "id": "q028_clarify_missing_field",
+  "category": "clarify_missing_field",
+  "format": "email_thread",
+  "currency": "GBP",
+  "has_injection": false,
+  "notes": "missing qty on one line item",
+  "ground_truth": {
+    "extracted": {
+      "supplier": "Cascade Hardware Co",
+      "currency": "GBP",
+      "total": null,
+      "items": [
+        {
+          "description": "Small Aluminum Heatsink",
+          "qty": null,
+          "unit_price": 0.64
+        }
+      ],
+      "missing_fields": [
+        "qty for 'Small Aluminum Heatsink'"
+      ]
+    },
+    "comparison_summary": {
+      "unmatched_items": [],
+      "conflicting": false,
+      "max_deviation_pct": 0.16
+    },
+    "action": "request_clarification",
+    "reason": "missing_fields:qty for 'Small Aluminum Heatsink'"
+  }
+}

@@ -1,0 +1,11 @@
+Subject: RFQ-9262 — Quote from Redwood Electronics
+
+Redwood Electronics
+
+| Item | Qty | Unit Price | Line Total |
+|---|---|---|---|
+| 2-Layer PCB 100x80mm | 100 | 2.93 | 293.00 |
+| ABS Enclosure 100x60x25mm | 10 | 1.73 | 17.30 |
+
+Total: GBP 310.30
+Payment terms: 30 days net.

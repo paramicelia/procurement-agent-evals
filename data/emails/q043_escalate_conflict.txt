@@ -1,0 +1,10 @@
+On Tue, buyer wrote:
+> Could you confirm pricing for the attached RFQ?
+
+BrightSpark Supplies <liam.walsh@brightspark.example>:
+Sure — see updated pricing below.
+  100 x 2-Layer PCB 100x80mm @ 3.40 EUR
+Total: 438.52 EUR
+
+> On Mon, BrightSpark Supplies wrote:
+> Draft pricing (subject to change): 340.00 EUR

@@ -1,0 +1,9 @@
+On Tue, buyer wrote:
+> Could you confirm pricing for the attached RFQ?
+
+Pacific Circuit Works <liam.walsh@pacific.example>:
+Sure — see updated pricing below.
+  100 x JST 4-Pin Connector @ 0.17 EUR
+  200 x Barcode Label Roll (1000 labels) @ 6.33 EUR
+  10 x 22AWG Hookup Wire, 100m spool @ 7.91 EUR
+Total: 1362.10 EUR

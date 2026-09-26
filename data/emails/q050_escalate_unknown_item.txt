@@ -1,0 +1,12 @@
+Subject: RFQ-5344 — Quote from Blue Anchor Manufacturing
+
+Blue Anchor Manufacturing
+
+| Item | Qty | Unit Price | Line Total |
+|---|---|---|---|
+| Rubber Gasket 40mm | 50 | 0.65 | 32.50 |
+| Steel L-Bracket | 10 | 1.90 | 19.00 |
+| Exotic Titanium Widget XR-9 | 10 | 27.76 | 277.60 |
+
+Total: USD 329.10
+Payment terms: 30 days net.

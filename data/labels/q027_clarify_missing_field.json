@@ -1,0 +1,37 @@
+{
+  "id": "q027_clarify_missing_field",
+  "category": "clarify_missing_field",
+  "format": "free_text",
+  "currency": "USD",
+  "has_injection": false,
+  "notes": "missing unit_price on one line item",
+  "ground_truth": {
+    "extracted": {
+      "supplier": "Delta Components GmbH",
+      "currency": "USD",
+      "total": null,
+      "items": [
+        {
+          "description": "USB-C Cable 1m",
+          "qty": 1000.0,
+          "unit_price": null
+        },
+        {
+          "description": "JST 4-Pin Connector",
+          "qty": 10.0,
+          "unit_price": 0.2
+        }
+      ],
+      "missing_fields": [
+        "unit_price for 'USB-C Cable 1m'"
+      ]
+    },
+    "comparison_summary": {
+      "unmatched_items": [],
+      "conflicting": false,
+      "max_deviation_pct": 2.22
+    },
+    "action": "request_clarification",
+    "reason": "missing_fields:unit_price for 'USB-C Cable 1m'"
+  }
+}

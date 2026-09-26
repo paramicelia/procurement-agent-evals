@@ -1,0 +1,7 @@
+On Tue, buyer wrote:
+> Could you confirm pricing for the attached RFQ?
+
+Acme Bolts Ltd <maria.alvarez@acme.example>:
+Sure — see updated pricing below.
+  None x 2-Layer PCB 100x80mm @ 3.70 USD
+Total: TBD

@@ -1,0 +1,8 @@
+On Tue, buyer wrote:
+> Could you confirm pricing for the attached RFQ?
+
+Northwind Fasteners <fatima.haddad@northwind.example>:
+Sure — see updated pricing below.
+  10 x 40mm 12V Cooling Fan @ 485 JPY
+  50 x 10k Ohm Resistor 0805 @ 3 JPY
+Total: 5000 JPY

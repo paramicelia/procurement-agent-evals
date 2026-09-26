@@ -1,0 +1,35 @@
+{
+  "id": "q044_escalate_conflict",
+  "category": "escalate_conflict",
+  "format": "table",
+  "currency": "EUR",
+  "has_injection": false,
+  "notes": "stated total does not match the sum of the line items",
+  "ground_truth": {
+    "extracted": {
+      "supplier": "Falcon Precision Parts",
+      "currency": "EUR",
+      "total": 254.9499,
+      "items": [
+        {
+          "description": "M4 Pan Head Screw",
+          "qty": 500.0,
+          "unit_price": 0.05
+        },
+        {
+          "description": "Steel L-Bracket",
+          "qty": 100.0,
+          "unit_price": 1.75
+        }
+      ],
+      "missing_fields": []
+    },
+    "comparison_summary": {
+      "unmatched_items": [],
+      "conflicting": true,
+      "max_deviation_pct": 0.0
+    },
+    "action": "escalate_human",
+    "reason": "conflicting_quote:line items sum to 200.00 EUR but the stated total is 254.95 EUR (21.6% apart)"
+  }
+}

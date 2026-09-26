@@ -1,0 +1,9 @@
+On Tue, buyer wrote:
+> Could you confirm pricing for the attached RFQ?
+
+Blue Anchor Manufacturing <fatima.haddad@blue.example>:
+Sure — see updated pricing below.
+  500 x 40mm 12V Cooling Fan @ 3.15 USD
+  50 x M6 Hex Bolt (zinc) @ 0.12 USD
+  20 x Reinforced Carbon Fiber Bracket Z2 @ 31.87 USD
+Total: 2218.40 USD

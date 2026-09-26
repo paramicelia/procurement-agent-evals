@@ -1,0 +1,40 @@
+{
+  "id": "q046_escalate_conflict",
+  "category": "escalate_conflict",
+  "format": "table",
+  "currency": "EUR",
+  "has_injection": false,
+  "notes": "stated total does not match the sum of the line items",
+  "ground_truth": {
+    "extracted": {
+      "supplier": "Wavelength Electronics",
+      "currency": "EUR",
+      "total": 1073.5661,
+      "items": [
+        {
+          "description": "Small Aluminum Heatsink",
+          "qty": 1000.0,
+          "unit_price": 0.75
+        },
+        {
+          "description": "ABS Enclosure 100x60x25mm",
+          "qty": 25.0,
+          "unit_price": 1.95
+        },
+        {
+          "description": "100uF Electrolytic Capacitor",
+          "qty": 200.0,
+          "unit_price": 0.09
+        }
+      ],
+      "missing_fields": []
+    },
+    "comparison_summary": {
+      "unmatched_items": [],
+      "conflicting": true,
+      "max_deviation_pct": 0.0
+    },
+    "action": "escalate_human",
+    "reason": "conflicting_quote:line items sum to 816.75 EUR but the stated total is 1073.57 EUR (23.9% apart)"
+  }
+}

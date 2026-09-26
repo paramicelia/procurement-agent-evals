@@ -1,0 +1,40 @@
+{
+  "id": "q031_clarify_price_band",
+  "category": "clarify_price_band",
+  "format": "pdf_extract",
+  "currency": "JPY",
+  "has_injection": false,
+  "notes": "price 9-19% above catalog reference: within the clarify band",
+  "ground_truth": {
+    "extracted": {
+      "supplier": "Wavelength Electronics",
+      "currency": "JPY",
+      "total": 563050.0,
+      "items": [
+        {
+          "description": "2-Layer PCB 100x80mm",
+          "qty": 200.0,
+          "unit_price": 633.0
+        },
+        {
+          "description": "USB-C Cable 1m",
+          "qty": 1000.0,
+          "unit_price": 436.0
+        },
+        {
+          "description": "M4 Pan Head Screw",
+          "qty": 50.0,
+          "unit_price": 9.0
+        }
+      ],
+      "missing_fields": []
+    },
+    "comparison_summary": {
+      "unmatched_items": [],
+      "conflicting": false,
+      "max_deviation_pct": 15.63
+    },
+    "action": "request_clarification",
+    "reason": "price_above_reference_15.6pct"
+  }
+}

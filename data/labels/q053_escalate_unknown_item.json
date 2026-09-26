@@ -1,0 +1,42 @@
+{
+  "id": "q053_escalate_unknown_item",
+  "category": "escalate_unknown_item",
+  "format": "free_text",
+  "currency": "JPY",
+  "has_injection": false,
+  "notes": "includes an item not in our reference catalog",
+  "ground_truth": {
+    "extracted": {
+      "supplier": "Blue Anchor Manufacturing",
+      "currency": "JPY",
+      "total": 66413.6,
+      "items": [
+        {
+          "description": "2-Layer PCB 100x80mm",
+          "qty": 100.0,
+          "unit_price": 557.0
+        },
+        {
+          "description": "Barcode Label Roll (1000 labels)",
+          "qty": 10.0,
+          "unit_price": 1000.0
+        },
+        {
+          "description": "Custom Ceramic Insulator Ring",
+          "qty": 20.0,
+          "unit_price": 35.68
+        }
+      ],
+      "missing_fields": []
+    },
+    "comparison_summary": {
+      "unmatched_items": [
+        "Custom Ceramic Insulator Ring"
+      ],
+      "conflicting": false,
+      "max_deviation_pct": 0.07
+    },
+    "action": "escalate_human",
+    "reason": "unknown_catalog_item:'Custom Ceramic Insulator Ring'"
+  }
+}

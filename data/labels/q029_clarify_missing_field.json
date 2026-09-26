@@ -1,0 +1,37 @@
+{
+  "id": "q029_clarify_missing_field",
+  "category": "clarify_missing_field",
+  "format": "email_thread",
+  "currency": "EUR",
+  "has_injection": false,
+  "notes": "missing unit_price on one line item",
+  "ground_truth": {
+    "extracted": {
+      "supplier": "Vantage Fasteners Inc",
+      "currency": "EUR",
+      "total": null,
+      "items": [
+        {
+          "description": "JST 4-Pin Connector",
+          "qty": 50.0,
+          "unit_price": null
+        },
+        {
+          "description": "Barcode Label Roll (1000 labels)",
+          "qty": 500.0,
+          "unit_price": 6.1
+        }
+      ],
+      "missing_fields": [
+        "unit_price for 'JST 4-Pin Connector'"
+      ]
+    },
+    "comparison_summary": {
+      "unmatched_items": [],
+      "conflicting": false,
+      "max_deviation_pct": 0.0
+    },
+    "action": "request_clarification",
+    "reason": "missing_fields:unit_price for 'JST 4-Pin Connector'"
+  }
+}

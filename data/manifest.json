@@ -1,0 +1,24 @@
+{
+  "seed": 1337,
+  "total": 61,
+  "by_category": {
+    "escalate_unknown_item": 6,
+    "escalate_conflict": 6,
+    "clarify_missing_field": 10,
+    "auto_accept": 20,
+    "escalate_price": 8,
+    "escalate_injection": 6,
+    "clarify_price_band": 5
+  },
+  "by_format": {
+    "table": 15,
+    "free_text": 12,
+    "email_thread": 17,
+    "pdf_extract": 17
+  },
+  "by_action": {
+    "escalate_human": 26,
+    "request_clarification": 16,
+    "auto_accept": 19
+  }
+}

@@ -1,0 +1,10 @@
+Subject: RFQ-1702 — Quote from Pacific Circuit Works
+
+Pacific Circuit Works
+
+| Item | Qty | Unit Price | Line Total |
+|---|---|---|---|
+| 2-Layer PCB 100x80mm | 50 | 2.82 | 141.00 |
+
+Total: GBP 141.00
+Payment terms: 30 days net.

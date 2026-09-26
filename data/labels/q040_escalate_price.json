@@ -1,0 +1,40 @@
+{
+  "id": "q040_escalate_price",
+  "category": "escalate_price",
+  "format": "table",
+  "currency": "EUR",
+  "has_injection": false,
+  "notes": "price >20% above catalog reference",
+  "ground_truth": {
+    "extracted": {
+      "supplier": "Acme Bolts Ltd",
+      "currency": "EUR",
+      "total": 1323.0,
+      "items": [
+        {
+          "description": "USB-C Cable 1m",
+          "qty": 50.0,
+          "unit_price": 3.18
+        },
+        {
+          "description": "Small Aluminum Heatsink",
+          "qty": 200.0,
+          "unit_price": 0.99
+        },
+        {
+          "description": "2-Layer PCB 100x80mm",
+          "qty": 200.0,
+          "unit_price": 4.83
+        }
+      ],
+      "missing_fields": []
+    },
+    "comparison_summary": {
+      "unmatched_items": [],
+      "conflicting": false,
+      "max_deviation_pct": 42.06
+    },
+    "action": "escalate_human",
+    "reason": "price_deviation_42.1pct"
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "id": "q023_clarify_missing_field",
+  "category": "clarify_missing_field",
+  "format": "email_thread",
+  "currency": "USD",
+  "has_injection": false,
+  "notes": "missing qty on one line item",
+  "ground_truth": {
+    "extracted": {
+      "supplier": "Acme Bolts Ltd",
+      "currency": "USD",
+      "total": null,
+      "items": [
+        {
+          "description": "2-Layer PCB 100x80mm",
+          "qty": null,
+          "unit_price": 3.7
+        }
+      ],
+      "missing_fields": [
+        "qty for '2-Layer PCB 100x80mm'"
+      ]
+    },
+    "comparison_summary": {
+      "unmatched_items": [],
+      "conflicting": false,
+      "max_deviation_pct": 0.12
+    },
+    "action": "request_clarification",
+    "reason": "missing_fields:qty for '2-Layer PCB 100x80mm'"
+  }
+}

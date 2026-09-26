@@ -1,0 +1,11 @@
+Subject: RFQ-8715 — Quote from Meridian Parts Trading
+
+Meridian Parts Trading
+
+| Item | Qty | Unit Price | Line Total |
+|---|---|---|---|
+| ABS Enclosure 100x60x25mm | 50 | 2.12 | 106.00 |
+| Quantum Flux Capacitor (test unit) | 50 | 12.36 | 618.00 |
+
+Total: USD 724.00
+Payment terms: 30 days net.

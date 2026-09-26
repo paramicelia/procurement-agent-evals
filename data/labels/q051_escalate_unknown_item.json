@@ -1,0 +1,42 @@
+{
+  "id": "q051_escalate_unknown_item",
+  "category": "escalate_unknown_item",
+  "format": "email_thread",
+  "currency": "USD",
+  "has_injection": false,
+  "notes": "includes an item not in our reference catalog",
+  "ground_truth": {
+    "extracted": {
+      "supplier": "Blue Anchor Manufacturing",
+      "currency": "USD",
+      "total": 2218.4,
+      "items": [
+        {
+          "description": "40mm 12V Cooling Fan",
+          "qty": 500.0,
+          "unit_price": 3.15
+        },
+        {
+          "description": "M6 Hex Bolt (zinc)",
+          "qty": 50.0,
+          "unit_price": 0.12
+        },
+        {
+          "description": "Reinforced Carbon Fiber Bracket Z2",
+          "qty": 20.0,
+          "unit_price": 31.87
+        }
+      ],
+      "missing_fields": []
+    },
+    "comparison_summary": {
+      "unmatched_items": [
+        "Reinforced Carbon Fiber Bracket Z2"
+      ],
+      "conflicting": false,
+      "max_deviation_pct": 0.36
+    },
+    "action": "escalate_human",
+    "reason": "unknown_catalog_item:'Reinforced Carbon Fiber Bracket Z2'"
+  }
+}

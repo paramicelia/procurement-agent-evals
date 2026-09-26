@@ -1,0 +1,12 @@
+Subject: RFQ-5049 — Quote from Wavelength Electronics
+
+Wavelength Electronics
+
+| Item | Qty | Unit Price | Line Total |
+|---|---|---|---|
+| Small Aluminum Heatsink | 1000 | 0.75 | 750.00 |
+| ABS Enclosure 100x60x25mm | 25 | 1.95 | 48.75 |
+| 100uF Electrolytic Capacitor | 200 | 0.09 | 18.00 |
+
+Total: EUR 1073.57
+Payment terms: 30 days net.

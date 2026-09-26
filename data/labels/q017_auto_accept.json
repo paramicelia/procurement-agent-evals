@@ -1,0 +1,30 @@
+{
+  "id": "q017_auto_accept",
+  "category": "auto_accept",
+  "format": "free_text",
+  "currency": "EUR",
+  "has_injection": false,
+  "notes": "clean quote within tolerance of catalog reference price",
+  "ground_truth": {
+    "extracted": {
+      "supplier": "Orion Connectors Ltd",
+      "currency": "EUR",
+      "total": 144.6,
+      "items": [
+        {
+          "description": "8mm Aluminum Panel",
+          "qty": 10.0,
+          "unit_price": 14.46
+        }
+      ],
+      "missing_fields": []
+    },
+    "comparison_summary": {
+      "unmatched_items": [],
+      "conflicting": false,
+      "max_deviation_pct": 0.28
+    },
+    "action": "auto_accept",
+    "reason": "within_tolerance"
+  }
+}

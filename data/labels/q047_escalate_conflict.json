@@ -1,0 +1,35 @@
+{
+  "id": "q047_escalate_conflict",
+  "category": "escalate_conflict",
+  "format": "pdf_extract",
+  "currency": "JPY",
+  "has_injection": false,
+  "notes": "stated total does not match the sum of the line items",
+  "ground_truth": {
+    "extracted": {
+      "supplier": "Redwood Electronics",
+      "currency": "JPY",
+      "total": 606674.5889,
+      "items": [
+        {
+          "description": "Small Aluminum Heatsink",
+          "qty": 10.0,
+          "unit_price": 123.0
+        },
+        {
+          "description": "8mm Aluminum Panel",
+          "qty": 200.0,
+          "unit_price": 2377.0
+        }
+      ],
+      "missing_fields": []
+    },
+    "comparison_summary": {
+      "unmatched_items": [],
+      "conflicting": true,
+      "max_deviation_pct": 0.04
+    },
+    "action": "escalate_human",
+    "reason": "conflicting_quote:line items sum to 476630.00 JPY but the stated total is 606674.59 JPY (21.4% apart)"
+  }
+}

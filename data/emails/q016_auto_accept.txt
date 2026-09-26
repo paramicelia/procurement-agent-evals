@@ -1,0 +1,11 @@
+Subject: RFQ-1708 — Quote from Vantage Fasteners Inc
+
+Vantage Fasteners Inc
+
+| Item | Qty | Unit Price | Line Total |
+|---|---|---|---|
+| JST 4-Pin Connector | 500 | 0.16 | 80.00 |
+| M4 Pan Head Screw | 200 | 0.04 | 8.00 |
+
+Total: GBP 88.00
+Payment terms: 30 days net.

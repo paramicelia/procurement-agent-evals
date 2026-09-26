@@ -1,0 +1,12 @@
+Subject: RFQ-7681 — Quote from Acme Bolts Ltd
+
+Acme Bolts Ltd
+
+| Item | Qty | Unit Price | Line Total |
+|---|---|---|---|
+| USB-C Cable 1m | 50 | 3.18 | 159.00 |
+| Small Aluminum Heatsink | 200 | 0.99 | 198.00 |
+| 2-Layer PCB 100x80mm | 200 | 4.83 | 966.00 |
+
+Total: EUR 1323.00
+Payment terms: 30 days net.

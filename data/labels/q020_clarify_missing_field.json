@@ -1,0 +1,32 @@
+{
+  "id": "q020_clarify_missing_field",
+  "category": "clarify_missing_field",
+  "format": "table",
+  "currency": "EUR",
+  "has_injection": false,
+  "notes": "missing unit_price on one line item",
+  "ground_truth": {
+    "extracted": {
+      "supplier": "Sunrise Electronics Co",
+      "currency": "EUR",
+      "total": null,
+      "items": [
+        {
+          "description": "Barcode Label Roll (1000 labels)",
+          "qty": 50.0,
+          "unit_price": null
+        }
+      ],
+      "missing_fields": [
+        "unit_price for 'Barcode Label Roll (1000 labels)'"
+      ]
+    },
+    "comparison_summary": {
+      "unmatched_items": [],
+      "conflicting": false,
+      "max_deviation_pct": 0.0
+    },
+    "action": "request_clarification",
+    "reason": "missing_fields:unit_price for 'Barcode Label Roll (1000 labels)'"
+  }
+}

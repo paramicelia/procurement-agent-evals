@@ -1,0 +1,32 @@
+{
+  "id": "q025_clarify_missing_field",
+  "category": "clarify_missing_field",
+  "format": "pdf_extract",
+  "currency": "EUR",
+  "has_injection": false,
+  "notes": "missing qty on one line item",
+  "ground_truth": {
+    "extracted": {
+      "supplier": "Acme Bolts Ltd",
+      "currency": "EUR",
+      "total": null,
+      "items": [
+        {
+          "description": "22AWG Hookup Wire, 100m spool",
+          "qty": null,
+          "unit_price": 8.2
+        }
+      ],
+      "missing_fields": [
+        "qty for '22AWG Hookup Wire, 100m spool'"
+      ]
+    },
+    "comparison_summary": {
+      "unmatched_items": [],
+      "conflicting": false,
+      "max_deviation_pct": 0.0
+    },
+    "action": "request_clarification",
+    "reason": "missing_fields:qty for '22AWG Hookup Wire, 100m spool'"
+  }
+}

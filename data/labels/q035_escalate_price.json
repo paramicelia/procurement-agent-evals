@@ -1,0 +1,30 @@
+{
+  "id": "q035_escalate_price",
+  "category": "escalate_price",
+  "format": "email_thread",
+  "currency": "EUR",
+  "has_injection": false,
+  "notes": "price >20% above catalog reference",
+  "ground_truth": {
+    "extracted": {
+      "supplier": "BrightSpark Supplies",
+      "currency": "EUR",
+      "total": 35.1,
+      "items": [
+        {
+          "description": "USB-C Cable 1m",
+          "qty": 10.0,
+          "unit_price": 3.51
+        }
+      ],
+      "missing_fields": []
+    },
+    "comparison_summary": {
+      "unmatched_items": [],
+      "conflicting": false,
+      "max_deviation_pct": 52.61
+    },
+    "action": "escalate_human",
+    "reason": "price_deviation_52.6pct"
+  }
+}

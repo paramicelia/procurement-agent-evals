@@ -1,0 +1,10 @@
+Subject: RFQ-4827 — Quote from Falcon Precision Parts
+
+Falcon Precision Parts
+
+| Item | Qty | Unit Price | Line Total |
+|---|---|---|---|
+| Rubber Gasket 40mm | 1000 | 98 | 98000 |
+
+Total: JPY 125107
+Payment terms: 30 days net.

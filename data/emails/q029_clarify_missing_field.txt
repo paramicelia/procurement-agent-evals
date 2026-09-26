@@ -1,0 +1,8 @@
+On Tue, buyer wrote:
+> Could you confirm pricing for the attached RFQ?
+
+Vantage Fasteners Inc <elena.petrova@vantage.example>:
+Sure — see updated pricing below.
+  50 x JST 4-Pin Connector @ TBD
+  500 x Barcode Label Roll (1000 labels) @ 6.10 EUR
+Total: TBD

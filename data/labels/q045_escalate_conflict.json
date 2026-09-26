@@ -1,0 +1,30 @@
+{
+  "id": "q045_escalate_conflict",
+  "category": "escalate_conflict",
+  "format": "free_text",
+  "currency": "USD",
+  "has_injection": false,
+  "notes": "stated total does not match the sum of the line items",
+  "ground_truth": {
+    "extracted": {
+      "supplier": "Sunrise Electronics Co",
+      "currency": "USD",
+      "total": 1454.4488,
+      "items": [
+        {
+          "description": "USB-C Cable 1m",
+          "qty": 500.0,
+          "unit_price": 2.5
+        }
+      ],
+      "missing_fields": []
+    },
+    "comparison_summary": {
+      "unmatched_items": [],
+      "conflicting": true,
+      "max_deviation_pct": 0.0
+    },
+    "action": "escalate_human",
+    "reason": "conflicting_quote:line items sum to 1250.00 USD but the stated total is 1454.45 USD (14.1% apart)"
+  }
+}

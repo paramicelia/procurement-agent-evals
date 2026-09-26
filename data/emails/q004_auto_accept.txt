@@ -1,0 +1,10 @@
+Subject: RFQ-6149 — Quote from Pacific Circuit Works
+
+Pacific Circuit Works
+
+| Item | Qty | Unit Price | Line Total |
+|---|---|---|---|
+| Rubber Gasket 40mm | 1000 | 0.52 | 520.00 |
+
+Total: GBP 520.00
+Payment terms: 30 days net.
