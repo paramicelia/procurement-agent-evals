@@ -7,12 +7,19 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
+# Use $PYTHON if set, else the repo's .venv, else python3 on PATH, so the
+# gate works without activating the venv first.
+if [ -z "${PYTHON:-}" ]; then
+  if [ -x .venv/bin/python ]; then PYTHON=.venv/bin/python; else PYTHON=python3; fi
+fi
+echo "using $PYTHON"
+
 echo "== ruff =="
-python -m ruff check procurement_agent evals tests data_gen scripts
+"$PYTHON" -m ruff check procurement_agent evals tests data_gen scripts
 
 echo
 echo "== pytest (unit + invariant tests; no network) =="
-python -m pytest tests/ -q
+"$PYTHON" -m pytest tests/ -q
 
 echo
 echo "== recorded-response ('cassette') eval subset — no network/CLI needed =="
@@ -24,7 +31,7 @@ q055_escalate_injection q056_escalate_injection"
 # Writes to traces/ci_gate_run.jsonl (gitignored, rewritten every run), not
 # the committed traces/ci_gate.jsonl example — see that file's own note.
 rm -f traces/ci_gate_run.jsonl
-python evals/run_eval.py \
+"$PYTHON" evals/run_eval.py \
   --provider cassette \
   --cassette evals/cassettes/ci_subset.jsonl \
   --ids $IDS \
@@ -34,7 +41,7 @@ python evals/run_eval.py \
 
 echo
 echo "== threshold gate =="
-python scripts/check_thresholds.py evals/ci/latest.json
+"$PYTHON" scripts/check_thresholds.py evals/ci/latest.json
 
 echo
 echo "GATE OK"

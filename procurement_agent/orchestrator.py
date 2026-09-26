@@ -28,7 +28,14 @@ from dataclasses import dataclass
 from .models import Action, ComparisonResult, ExtractedQuote
 from .providers.base import LLMProvider
 from .store import Store
-from .tools import compare_to_catalog, decide, draft_followup, extract_quote, place_order
+from .tools import (
+    compare_to_catalog,
+    decide,
+    draft_followup,
+    extract_quote,
+    injection_detected,
+    place_order,
+)
 from .tracing import Tracer
 
 STATE_INIT = "init"
@@ -52,6 +59,75 @@ TERMINAL_STATES = {
 def idempotency_key(task_id: str, extracted: ExtractedQuote) -> str:
     fingerprint = extracted.model_dump_json()
     return hashlib.sha256(f"{task_id}:{fingerprint}".encode()).hexdigest()[:24]
+
+
+RAW_EXCERPT_CHARS = 2000
+
+
+class ApprovalPayloadMismatchError(RuntimeError):
+    """The approved payload no longer matches the run's extraction, so the
+    human approved something other than what would be written."""
+
+
+def build_approval_payload(
+    task_id: str,
+    raw_text: str,
+    extracted: ExtractedQuote,
+    comparison: ComparisonResult,
+    decision_reason: str | None,
+) -> dict:
+    """What the human approver sees before a place_order write is allowed.
+
+    Everything the order would contain (supplier, each line's item, qty,
+    unit price, line total, the total), how it compares to the catalog,
+    the flags the policy looked at, and an excerpt of the raw email. The
+    injection flag is the regex detector only, which misses paraphrased
+    attacks (see EVALS_INJECTION_HOLDOUT.md), so the raw excerpt is
+    included for the human to read rather than trusting that flag.
+    """
+    lines = []
+    computable = bool(extracted.items)
+    computed_total = 0.0
+    for idx, item in enumerate(extracted.items):
+        match = next((m for m in comparison.matches if m.line_index == idx), None)
+        line_total = None
+        if item.qty is not None and item.unit_price is not None:
+            line_total = round(item.qty * item.unit_price, 4)
+            computed_total += line_total
+        else:
+            computable = False
+        lines.append(
+            {
+                "description": item.description,
+                "qty": item.qty,
+                "unit_price": item.unit_price,
+                "line_total": line_total,
+                "matched_sku": match.matched_sku if match else None,
+                "catalog_unit_price_eur": match.catalog_unit_price_eur if match else None,
+                "quoted_unit_price_eur": match.quoted_unit_price_eur if match else None,
+                "deviation_pct": round(match.deviation_pct, 2) if match and match.deviation_pct is not None else None,
+            }
+        )
+    raw = raw_text or ""
+    return {
+        "idempotency_key": idempotency_key(task_id, extracted),
+        "task_id": task_id,
+        "supplier": extracted.supplier,
+        "currency": extracted.currency,
+        "lines": lines,
+        "stated_total": extracted.total,
+        "computed_total": round(computed_total, 4) if computable else None,
+        "max_deviation_pct": comparison.max_deviation_pct,
+        "decision_reason": decision_reason,
+        "flags": {
+            "injection_regex_hit": injection_detected(raw),
+            "conflicting_total": comparison.conflicting,
+            "unmatched_items": list(comparison.unmatched_items),
+            "missing_fields": list(extracted.missing_fields),
+        },
+        "raw_email_excerpt": raw[:RAW_EXCERPT_CHARS],
+        "raw_email_truncated": len(raw) > RAW_EXCERPT_CHARS,
+    }
 
 
 @dataclass
@@ -111,8 +187,9 @@ def run_task(
         action = row["action"]
         extracted = ExtractedQuote.model_validate_json(row["extracted_json"])
         if action == Action.AUTO_ACCEPT.value:
-            key = idempotency_key(task_id, extracted)
-            store.create_approval(task_id, "place_order", {"idempotency_key": key})
+            comparison = ComparisonResult.model_validate_json(row["comparison_json"])
+            payload = build_approval_payload(task_id, raw_text, extracted, comparison, row["reason"])
+            store.create_approval(task_id, "place_order", payload)
             store.upsert_run(task_id, state=STATE_AWAITING_APPROVAL)
             return StepResult(task_id, STATE_AWAITING_APPROVAL, halted_for_approval=True)
         if action == Action.REQUEST_CLARIFICATION.value:
@@ -150,6 +227,13 @@ def resume_after_approval(task_id: str, store: Store, tracer: Tracer | None = No
     payload = json.loads(approval["payload_json"])
 
     if approval["status"] == "approved":
+        # The key is a hash of the extraction the human saw. If the run's
+        # extraction changed since then, refuse instead of writing an order
+        # nobody approved.
+        if payload["idempotency_key"] != idempotency_key(task_id, extracted):
+            raise ApprovalPayloadMismatchError(
+                f"task {task_id}: approved payload does not match the current extraction; re-approve"
+            )
         with tracer.span(task_id, "place_order") as span:
             order_id = place_order(
                 task_id=task_id, extracted=extracted, idempotency_key=payload["idempotency_key"], store=store

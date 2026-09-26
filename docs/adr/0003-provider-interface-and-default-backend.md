@@ -33,9 +33,12 @@ implementations:
 
 Without it, the CLI auto-discovers this machine's `CLAUDE.md` files (there
 are two multi-hundred-line ones on this box) and injects them as context on
-every single-turn extraction call — measured at ~$0.15–0.17/call on a
-20k-token cache-creation hit versus ~$0.01/call with `--safe-mode`, an
-order of magnitude difference for identical output. `--safe-mode` also
+every single-turn extraction call. During development this was observed
+at roughly $0.15–0.17/call (a ~20k-token cache-creation hit) versus about
+$0.01/call with `--safe-mode`; those per-call figures come from ad-hoc
+development runs whose raw output is not committed, so treat them as
+indicative only. The committed n=61 run with `--safe-mode` averaged
+$0.0078/call (CLI-reported, `evals/results/latest.json`). `--safe-mode` also
 disables hooks, skills, and MCP servers, so the extraction call is exactly
 "one prompt in, one JSON blob out" — no tool access, no side effects,
 regardless of what an injected email says.

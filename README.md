@@ -84,11 +84,13 @@ python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 
 make data                 # regenerate the 61 synthetic fixtures (deterministic, seed 1337)
-make test                 # 31 unit + invariant tests, no network, <1s
+make test                 # 42 unit + invariant tests, no network, <1s
 make lint                 # ruff
 make demo                 # drive 5 fixtures through the real orchestrator + approval queue
 make eval                 # full measured run against the default backend (claude-cli), then
-                           #   regenerates EVALS.md — costs a few $0.01s and a couple of minutes
+                           #   regenerates EVALS.md — the committed n=61 run cost ≈$0.47 in total
+                           #   (CLI-reported, evals/results/latest.json: aggregate.cost_usd_total)
+                           #   and took a couple of minutes
 make eval-cassette        # the same harness, offline, against the recorded 14-fixture cassette
 make gate                 # exactly what CI runs: lint + tests + cassette eval + threshold check
 ```
@@ -100,6 +102,14 @@ python -m procurement_agent.cli run-all --data-dir data/emails --db runs.db
 python -m procurement_agent.cli pending --db runs.db
 python -m procurement_agent.cli approve <task_id> --db runs.db   # or: reject
 ```
+
+`pending` prints what the approver is being asked to sign off: supplier,
+currency, every line (item, qty, unit price, line total, deviation from the
+catalog price), stated vs computed total, the policy reason, the flags the
+policy checked (injection-regex hit, conflicting total, unmatched items,
+missing fields), the idempotency key, and an excerpt of the raw email. The
+key is a hash of that extraction, and `resume_after_approval` refuses to
+write if the extraction changed after approval.
 
 ### Using a different LLM backend
 
@@ -118,34 +128,41 @@ No secret is ever hardcoded, printed, or committed; see `docs/adr/0003`.
 ## Measured results (n=61, default backend)
 
 Full table, failure taxonomy, and concrete examples: **[EVALS.md](EVALS.md)**
-— generated, not hand-typed.
+— generated, not hand-typed. Read [LIMITATIONS.md](LIMITATIONS.md) for what
+the numbers do and don't prove.
 
-> **Before citing the 100% figures below**: they're from a clean, in-distribution
-> benchmark, not an adversarial or held-out one. Two harder, separately-reported
-> slices exist specifically because a clean 100% with no example of the model
-> failing is itself a red flag:
-> - **[EVALS_INJECTION_HOLDOUT.md](EVALS_INJECTION_HOLDOUT.md)** — measured:
->   the same injection detector catches **0/10 (0.0%)** paraphrased,
->   lexically-disjoint adversarial phrasings, vs. 100% on the in-distribution
->   set below. Read it before trusting the 100% injection-recall row.
-> - **[EVALS_HARD.md](EVALS_HARD.md)** — data and harness are committed
->   (noisy OCR-style text, ambiguous multi-currency line items); the live
->   run is **not yet measured** (blocked on the default backend's session
->   limit at the time of this fix round) — see that file for exactly why,
->   rather than a number filled in either way.
->
-> Read [LIMITATIONS.md](LIMITATIONS.md) for what the numbers below do and
-> don't prove.
+What carries weight here, in order:
+
+1. **Write-safety invariants** (`tests/test_invariants.py`, below): no order
+   without a human-approved row, idempotent retries, crash-resume, checked
+   against the real SQLite tables.
+2. **The offline regression gate** (below): ruff + tests + a recorded
+   14-fixture eval + thresholds, and a deliberately broken branch that fails it.
+3. **Held-out injection test —
+   [EVALS_INJECTION_HOLDOUT.md](EVALS_INJECTION_HOLDOUT.md)**: the regex
+   injection detector catches **0/10** reworded adversarial phrasings. This
+   is a published weakness, not a pass.
+4. **Extraction, cost and latency on 61 synthetic quotes:**
 
 | Metric | Value |
 |---|---|
-| Cost per task (mean) | $0.0078 |
-| Latency per task (p50 / p95) | 6.3s / 11.3s |
-| Action accuracy | 100.0% (n=61) |
 | Field-extraction accuracy (mean) | 98.6% |
-| Escalation precision / recall | 100.0% / 100.0% |
-| Injection recall (in-distribution, n=6) | 100.0% |
-| Injection recall (held-out paraphrases, n=10) | **0.0%** — see EVALS_INJECTION_HOLDOUT.md |
+| Cost per task (mean, CLI-reported) | $0.0078 (total $0.47) |
+| Latency per task (p50 / p95, incl. CLI start-up) | 6.3s / 11.3s |
+| Injection recall, held-out paraphrases (n=10) | **0.0%** |
+| Injection recall, in-distribution (n=6; near-circular) | 100.0% |
+
+Not headline numbers: action agreement and escalation precision/recall are
+both 100% on this set, but they are **near-circular**. The expected actions
+come from the same `decide()`/`compare_to_catalog()` code the agent runs,
+applied to the ground-truth extraction, so they only show that the policy
+answers the same way on the model's extraction as on the true one. They
+never test whether the policy is right. The 5 extraction "misses" are
+generator artefacts (see EVALS.md), so this benchmark is saturated.
+
+A harder slice (**[EVALS_HARD.md](EVALS_HARD.md)**: noisy OCR-style text,
+ambiguous multi-currency lines) has its data and harness committed but is
+**not yet measured**; no number is reported for it.
 
 Regression gate: **[.github/workflows/gate.yml](.github/workflows/gate.yml)**
 runs ruff + pytest + a 14-fixture recorded-cassette eval subset with fixed
@@ -176,6 +193,12 @@ orchestrator internals):
 - **resume after a crash continues, not restarts** — a simulated crash
   between steps is followed by a resumed run that does not re-call
   `extract_quote` (the paid step) a second time;
+- **the approver sees what they approve** — `tests/test_approval_payload.py`
+  checks the approval payload and the `pending` output carry supplier,
+  items, qty, unit price, totals, flags and the idempotency key; that each
+  of the 10 held-out injections the regex misses is visible in the raw-email
+  excerpt shown to the approver; and that a write is refused if the
+  extraction changed after approval;
 - **the approval-creation checkpoint is also crash-safe** — a simulated
   crash between `create_approval` and its own checkpoint no longer produces
   a duplicate `place_order` approval on resume (found by code review, fixed,
@@ -183,11 +206,12 @@ orchestrator internals):
   tested too, but left un-fixed on purpose since a crash there only re-runs
   one cheap LLM call rather than corrupting state — see LIMITATIONS.md.
 
-## What I'd do in production
+## Production next steps
 
-- **Human approval UI**, not a CLI — a real reviewer needs the extracted
-  quote, the catalog comparison, and the raw email side by side, not a
-  `pending` table row.
+- **Human approval UI**, not a CLI — the approval payload already carries
+  the extracted quote, the catalog comparison, the flags and a raw-email
+  excerpt; a real reviewer needs them side by side with the full email and
+  the supplier's history, not a terminal printout.
 - **Monitoring/alerts**: escalation rate and injection-detection rate as
   live metrics with alerting on drift; a paged on-call for a spike in
   `escalate_human` (could mean a supplier integration broke) or in orders
@@ -223,4 +247,4 @@ reasoning, pending review," including the state-machine-vs-LangGraph call,
 the 8%/20% escalation thresholds, and the specific injection regex list.
 
 No company names, real supplier data, or credentials appear anywhere in this
-repository. Nothing here was pushed, published, or sent to anyone.
+repository.

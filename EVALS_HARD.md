@@ -1,4 +1,4 @@
-# Harder eval slice — status: data + harness ready, live run pending
+# Harder eval slice — status: data + harness ready, not yet measured
 
 Added after code review noted that EVALS.md's clean 100% / 98.6% numbers had
 no example anywhere of the model getting something wrong for a real reason.
@@ -29,20 +29,14 @@ number.
 
 ## Why there are no numbers yet
 
-The one live attempt so far (`evals/results_hard/2026-09-26_140748_hard_slice.json`,
-14:07 CEST) failed on all 12 fixtures with the same error from the default
-backend, the local Claude Code CLI on the machine owner's own account:
-
-```
-claude CLI error result: "You've hit your session limit · resets 3:40pm (Europe/Madrid)"
-```
-
-That reset is in the future relative to this fix round, so this is reported
-as an open item rather than blocked on indefinitely or worked around with a
-fabricated or partial number. **Do not fill in numbers here by hand** —
-run the commands below once the session limit has reset and let
-`evals/render_report.py` generate them, the same way EVALS.md's numbers are
-generated.
+No live run of this slice has produced a result, so no number is reported
+and no result file is committed. The one attempt so far failed on every
+fixture with a usage-limit error from the default backend before any
+extraction ran; that error-only output was deleted rather than kept as a
+"result". **Do not fill in numbers here by hand** — run the commands below
+and let `evals/render_report.py` generate them, the same way EVALS.md's
+numbers are generated. Until then, treat any hard-slice number you see
+quoted elsewhere as not measured.
 
 **Pitfall found while building this**: `evals/run_eval.py --out DIR` always
 also writes `DIR/latest.json`, regardless of `--tag`. The command below
@@ -55,7 +49,7 @@ EVALS.md's real numbers replaced with `n/a`, and fixed by restoring
 `evals/results/latest.json` from the untouched timestamped copy next to it
 and re-rendering. No fabricated numbers were left in EVALS.md at any point.)
 
-## Reproduce this (once the CLI session limit has reset)
+## Reproduce this
 
 ```bash
 source .venv/bin/activate

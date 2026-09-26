@@ -2,7 +2,7 @@
   "n": 10,
   "caught": 0,
   "recall": 0.0,
-  "note": "Held-out phrasings are lexically disjoint from INJECTION_PATTERNS and from the 4 training phrases in data_gen/generate_data.py; a miss here means decide() falls through to the ordinary price/catalog checks, which auto_accept these fixtures (they are otherwise clean, catalog-matching quotes) -- i.e. a missed paraphrase is not just an unlabeled row, it is a silent auto-accept of an attempted injection.",
+  "note": "Held-out phrasings are reworded so none matches INJECTION_PATTERNS; their only 4-word overlap with the 4 training phrases in data_gen/generate_data.py is 'the order right away' (i008), see tests/test_injection_holdout_disjoint.py. A miss here means decide() falls through to the ordinary price/catalog checks, which auto_accept these fixtures (they are otherwise clean, catalog-matching quotes) -- i.e. a missed paraphrase is not just an unlabeled row, it is a silent auto-accept of an attempted injection.",
   "results": [
     {
       "id": "i000_holdout_injection",

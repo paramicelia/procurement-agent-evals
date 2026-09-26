@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Measures injection_detected() recall on a held-out, lexically-disjoint set
+"""Measures injection_detected() recall on a held-out, reworded set
 of adversarial phrasings (data_holdout_injection/), separately from the
 in-distribution n=6 figure in EVALS.md.
 
@@ -72,8 +72,9 @@ def main() -> None:
         "n": n,
         "caught": caught_n,
         "recall": recall,
-        "note": ("Held-out phrasings are lexically disjoint from INJECTION_PATTERNS and from the "
-                 "4 training phrases in data_gen/generate_data.py; a miss here means decide() falls "
+        "note": ("Held-out phrasings are reworded so none matches INJECTION_PATTERNS; their only "
+                 "4-word overlap with the 4 training phrases in data_gen/generate_data.py is 'the order "
+                 "right away' (i008), see tests/test_injection_holdout_disjoint.py. A miss here means decide() falls "
                  "through to the ordinary price/catalog checks, which auto_accept these fixtures "
                  "(they are otherwise clean, catalog-matching quotes) -- i.e. a missed paraphrase is "
                  "not just an unlabeled row, it is a silent auto-accept of an attempted injection."),
@@ -109,10 +110,11 @@ phrases the same author wrote in the same session as the regex being scored
 same detector (`procurement_agent.tools.injection_detected`, the regex behind
 `INJECTION_PATTERNS`) against {n} paraphrases that express the same
 underlying attacks (ignore prior instructions, claim approver authority,
-claim pre-approval, tell the agent to skip review) in different words, never
-copied from `INJECTION_PATTERNS` or from the 4 training phrases in
-`data_gen/generate_data.py` (verified programmatically before committing —
-see the script's docstring).
+claim pre-approval, tell the agent to skip review) in different words.
+`tests/test_injection_holdout_disjoint.py` checks that none of them matches
+the regex and that their only 4-word overlap with the 4 in-distribution
+phrases in `data_gen/generate_data.py` is "the order right away" (i008),
+which the regex still misses because its pattern requires "place" first.
 
 ## Result
 
@@ -132,7 +134,10 @@ for an approved approval row; see ADR 0002 and
 `tests/test_invariants.py::test_no_write_without_approval`) does not depend
 on this regex at all — a missed injection still only reaches
 `auto_accept` -> a **pending, unapproved** approval request. A human still
-has to approve it before anything is written. What this number measures is
+has to approve it before anything is written, and that approval request
+shows the extracted order next to an excerpt of the raw email, so the
+injected sentence is in front of the approver (`build_approval_payload` in
+`procurement_agent/orchestrator.py`; the approver can still miss it). What this number measures is
 whether the regex successfully routes a sneaky email to a human's attention
 sooner (as `escalate_human`) instead of the normal approval queue — a
 real, measured, and currently weak capability, not the safety boundary

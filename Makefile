@@ -23,7 +23,7 @@ eval:
 
 eval-injection-holdout:
 	# No LLM, no network: pure regex/deterministic-policy measurement against
-	# a held-out, lexically-disjoint set of injection paraphrases. See
+	# a held-out, reworded set of injection paraphrases. See
 	# EVALS_INJECTION_HOLDOUT.md.
 	$(VENV)/python data_gen/generate_injection_holdout.py --out-dir data_holdout_injection --seed 4242
 	$(VENV)/python evals/run_injection_holdout.py

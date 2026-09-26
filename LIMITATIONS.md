@@ -8,16 +8,19 @@ a general claim about "how good this agent is." Specifically:
 
 - **n=61, one seed, one model, one run.** No confidence intervals, no
   repeated runs, no held-out set separate from the one the thresholds were
-  tuned against. A single run's 100% action accuracy at this n is consistent
-  with a genuinely easy, well-specified extraction task (JSON schema,
-  templated formats) — it is not evidence the agent "never makes mistakes."
-  Treat it as a floor for a clean benchmark, not a ceiling for a hard one.
+  tuned against. The 100% action agreement is near-circular (next point)
+  and, at this n, consistent with a genuinely easy, well-specified
+  extraction task (JSON schema, templated formats) — it is not evidence the
+  agent "never makes mistakes." Treat it as a floor for a clean benchmark,
+  not a ceiling for a hard one.
 - **Labels are generator-deterministic, not human-reviewed.** `decide()` and
   `compare_to_catalog()` are shared code between the generator and the live
   agent (see `docs/adr/0002...`), so an eval mismatch can only come from the
-  extraction step — but nobody with a procurement background has checked
+  extraction step. That makes action agreement near-circular: it measures
+  whether the policy gives the same answer on the model's extraction as on
+  the true one, never whether the policy is right — but nobody with a procurement background has checked
   whether the *policy itself* (8%/20% deviation thresholds, the specific
-  regex injection patterns) is actually sound. It encodes my/the agent's
+  regex injection patterns) is actually sound. It encodes the agent's
   judgment call, not a domain expert's.
 - **One model family, one provider path.** Every number is Claude Haiku via
   the local CLI (`--effort low`). No comparison against another model.
@@ -26,7 +29,7 @@ a general claim about "how good this agent is." Specifically:
   written by the same person, in the same session, as the regex being tested
   — disclosed here from the start. What was missing was an actual adversarial
   number instead of just a caveat. **[EVALS_INJECTION_HOLDOUT.md](EVALS_INJECTION_HOLDOUT.md)**
-  now reports it: **0/10 (0.0%)** held-out, lexically-disjoint paraphrases of
+  now reports it: **0/10 (0.0%)** held-out, reworded paraphrases (none matches the regex) of
   the same underlying attacks are caught by the regex. Every miss silently
   results in `auto_accept`, not a benign unlabeled row. Read that file's
   "what this does NOT mean" section before treating this as a write-safety
@@ -35,8 +38,7 @@ a general claim about "how good this agent is." Specifically:
   therefore-fine one.
 - **A harder eval slice exists but isn't measured yet.** `data_hard/` (noisy
   OCR-style text, ambiguous multi-currency line items) and the harness to
-  run it are committed; the one live attempt hit the default backend's
-  session limit. See **[EVALS_HARD.md](EVALS_HARD.md)** for exactly what's
+  run it are committed; no live run has produced a result yet. See **[EVALS_HARD.md](EVALS_HARD.md)** for exactly what's
   pending and why — treat any harder-eval number you don't find generated
   in that file as not having happened yet.
 - **A generator artifact, disclosed rather than hidden**: 5 of 61 fixtures
@@ -45,14 +47,26 @@ a general claim about "how good this agent is." Specifically:
   to print a currency code). The ground-truth label still names a currency
   (the generator "knows" it), so the model correctly returning `null` there
   is scored as a field mismatch even though refusing to guess is the right
-  behavior. See EVALS.md's failure taxonomy — I chose to label and explain
-  this rather than quietly exclude those 5 items or patch the labels after
-  seeing the model's answers.
+  behavior. See EVALS.md's failure taxonomy — these are labelled and explained
+  rather than quietly excluded or re-labelled after seeing the model's
+  answers.
+- **One fixture's category doesn't match its label.** `q019_auto_accept`
+  was generated as a within-tolerance quote, but its 10k Ohm resistor is
+  quoted in JPY at a whole 3 yen, which converts to 8.5% *below* the 0.02
+  EUR catalog price. `decide()` compares the absolute deviation against the
+  8% band, so the ground-truth label is `request_clarification` (with the
+  reason string `price_above_reference_8.5pct`, which is misleading for a
+  price below reference). EVALS.md therefore shows a breakdown by expected
+  action next to the by-category one and names this fixture. Whether a
+  below-catalog price should trigger clarification at all is a policy
+  question nobody has reviewed.
 - **Minor rendering rough edge**: the `table`/`pdf_extract` renderers
   sometimes print the literal text `None` instead of a placeholder like
-  `TBD` for an intentionally-omitted qty/price. Cosmetic — it doesn't change
-  any label or metric — but it's a rough edge in `data_gen/generate_data.py`
-  I noticed after generating the committed data and did not re-roll for
+  `TBD` for an intentionally-omitted qty/price, and some templates render
+  odd fragments such as `Payment terms: 3` or a truncated `Sub Total ....... se`
+  (visible in EVALS.md's examples). Cosmetic — it doesn't change
+  any label or metric — but it's a rough edge in `data_gen/generate_data.py`,
+  noticed after the committed data was generated and not re-rolled
   (re-rolling would have meant re-running the paid eval a third time; not
   worth it for a display string).
 
@@ -98,8 +112,8 @@ a general claim about "how good this agent is." Specifically:
   prior approved approval row — is proven by `tests/test_invariants.py`
   against the real SQLite table, not asserted from documentation.
 - The **detection** numbers (injection recall, escalation precision/recall)
-  are *measured and imperfect*, from `EVALS.md`, over a benchmark I built
-  myself. A real adversary optimizing against my specific regex list would
+  are *measured and imperfect*, from `EVALS.md`, over a benchmark built by the
+  same agent that wrote the regex. A real adversary optimizing against this specific regex list would
   likely beat it. The structural guarantee is what should be trusted; the
   detection numbers are a secondary, weaker claim.
 

@@ -74,3 +74,19 @@ it returns the existing row instead of inserting a duplicate. See
 `tests/test_invariants.py::test_crash_between_create_approval_and_checkpoint_does_not_duplicate`
 and `LIMITATIONS.md`'s "About crash-resume" section for the analogous,
 deliberately-not-fixed case around `draft_followup`.
+
+## Addendum (review round 2, 2026-09-26): the approval carried nothing to judge
+
+The approval payload used to be only `{"idempotency_key": ...}`, and
+`cli pending` printed only the task id and kind, so the "a human still has
+to approve it" argument assumed a human who could see nothing. The payload
+now carries what would be written and why: supplier, currency, each line's
+item, qty, unit price, line total and catalog deviation, stated vs computed
+total, the policy reason, the flags `decide()` checked (injection-regex hit,
+conflicting total, unmatched items, missing fields) and the first 2000
+characters of the raw email; `cli pending` prints all of it. The injection
+flag is only the regex, which misses paraphrases, so the raw excerpt is the
+part that lets an approver spot an injected sentence. The idempotency key is
+a hash of the approved extraction, and `resume_after_approval` refuses to
+write (`ApprovalPayloadMismatchError`) if the checkpointed extraction no
+longer hashes to the approved key. See `tests/test_approval_payload.py`.

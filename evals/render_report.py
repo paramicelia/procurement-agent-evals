@@ -53,9 +53,44 @@ def main() -> None:
     except ValueError:
         date_str = generated_at
 
+    # Categories are the generator's *intent*; the label is whatever decide()
+    # returns on the ground-truth extraction, and the two can differ (e.g. a
+    # JPY price rounded to a whole yen can move a line past the 8% band). So
+    # show which expected actions each category actually contains, and a
+    # separate breakdown by expected action.
+    ok_results = [r for r in results if not r.get("error")]
+    cat_actions: dict[str, dict[str, int]] = {}
+    by_action: dict[str, dict[str, int]] = {}
+    for r in ok_results:
+        cat_actions.setdefault(r["category"], {}).setdefault(r["expected_action"], 0)
+        cat_actions[r["category"]][r["expected_action"]] += 1
+        a = by_action.setdefault(r["expected_action"], {"n": 0, "correct": 0})
+        a["n"] += 1
+        a["correct"] += int(r["predicted_action"] == r["expected_action"])
+
+    def _actions(cat: str) -> str:
+        return ", ".join(f"{a} ×{n}" for a, n in sorted(cat_actions.get(cat, {}).items()))
+
     by_cat_rows = "\n".join(
-        f"| {cat} | {v['n']} | {v['action_correct']} | {fmt_pct(v['action_correct'] / v['n'] if v['n'] else None)} |"
+        f"| {cat} | {v['n']} | {_actions(cat)} | {v['action_correct']} | "
+        f"{fmt_pct(v['action_correct'] / v['n'] if v['n'] else None)} |"
         for cat, v in sorted(agg["by_category"].items())
+    )
+    by_action_rows = "\n".join(
+        f"| {a} | {v['n']} | {v['correct']} | {fmt_pct(v['correct'] / v['n'] if v['n'] else None)} |"
+        for a, v in sorted(by_action.items())
+    )
+    mixed = sorted(
+        (r["id"], r["category"], r["expected_action"], r["expected_reason"])
+        for r in ok_results
+        if len(cat_actions.get(r["category"], {})) > 1
+        and r["expected_action"] != max(cat_actions[r["category"]], key=cat_actions[r["category"]].get)
+    )
+    mixed_note = (
+        "Categories whose fixtures don't all share one expected action: "
+        + "; ".join(f"`{i}` (category `{c}`) is labelled `{a}` ({why})" for i, c, a, why in mixed)
+        + ". The label comes from `decide()` on the ground-truth extraction, not from the category name."
+        if mixed else "Every category's fixtures share one expected action."
     )
 
     failure_rows = "\n".join(
@@ -91,34 +126,47 @@ edit the harness (`evals/run_eval.py`, `evals/metrics.py`) and re-run instead.
 - Full raw per-item results: `evals/results/{results_path.name}`
 - Related, separately-reported slices: **[EVALS_INJECTION_HOLDOUT.md](EVALS_INJECTION_HOLDOUT.md)**
   (measured: 0/10 held-out adversarial paraphrases caught, vs. 100% in-distribution below) and
-  **[EVALS_HARD.md](EVALS_HARD.md)** (noisy/ambiguous inputs; data and harness committed, live run pending)
+  **[EVALS_HARD.md](EVALS_HARD.md)** (noisy/ambiguous inputs; data and harness committed, not yet measured)
 
 ## Headline numbers
 
 | Metric | Value | n |
 |---|---|---|
-| Action accuracy (auto_accept / clarify / escalate) | **{fmt_pct(agg['action_accuracy'])}** | {agg['n_ok']} |
 | Field-extraction accuracy (mean) | {fmt_pct(agg['extraction_accuracy_mean'])} | {agg['n_ok']} |
 | Field-extraction accuracy (median) | {fmt_pct(agg['extraction_accuracy_median'])} | {agg['n_ok']} |
 | Escalation precision | {fmt_pct(agg['escalation_precision'])} | tp={agg['escalation_tp']} fp={agg['escalation_fp']} |
 | Escalation recall | {fmt_pct(agg['escalation_recall'])} | tp={agg['escalation_tp']} fn={agg['escalation_fn']} |
-| Injection recall (routed to escalate_human) | {fmt_pct(agg['injection_recall'])} | n={agg['injection_n']} |
+| Injection recall, in-distribution (near-circular; held-out paraphrases: 0/10) | {fmt_pct(agg['injection_recall'])} | n={agg['injection_n']} |
 | Cost per task (mean, CLI-reported) | ${fmt_num(agg['cost_usd_mean'], 4)} | total ${fmt_num(agg['cost_usd_total'], 2)} |
 | Latency per task (p50 / p95) | {fmt_num(agg['latency_s_p50'])}s / {fmt_num(agg['latency_s_p95'])}s | mean {fmt_num(agg['latency_s_mean'])}s |
+| Action agreement with labels (near-circular, see below) | {fmt_pct(agg['action_accuracy'])} | {agg['n_ok']} |
 
-**Read this as**: on {agg['n']} deterministically-labeled synthetic fixtures, with a
-JSON-schema-constrained extraction call, the default backend (Claude Haiku via
-the local CLI, `--effort low`) got every downstream **action** right, and
-{fmt_pct(agg['extraction_accuracy_mean'])} of individual extracted **fields** right. See
-"what this does and doesn't prove" in LIMITATIONS.md before treating 100%
-action accuracy as a general claim about the agent — this is a small, clean,
-synthetic benchmark, not an adversarial or production one.
+**Read this as**: on {agg['n']} synthetic fixtures, with a JSON-schema-constrained
+extraction call, the default backend (Claude Haiku via the local CLI,
+`--effort low`) got {fmt_pct(agg['extraction_accuracy_mean'])} of individual extracted **fields** right.
 
-## By category
+**The action row is near-circular.** The expected action for each fixture is
+produced by the same `decide()` / `compare_to_catalog()` code the agent runs
+(`procurement_agent/tools.py`), applied to the ground-truth extraction. So
+action agreement only shows that the policy gives the same answer on the
+model's extraction as on the true one; it never tests whether the policy
+itself is right. The escalation precision/recall rows inherit the same
+limitation. This is a small, clean, synthetic benchmark, not an adversarial
+or production one; see LIMITATIONS.md.
 
-| category | n | action correct | accuracy |
+## By expected action
+
+| expected action | n | agreed | agreement |
 |---|---|---|---|
+{by_action_rows}
+
+## By generator category
+
+| category | n | expected actions | agreed | agreement |
+|---|---|---|---|---|
 {by_cat_rows}
+
+{mixed_note}
 
 ## Failure taxonomy
 

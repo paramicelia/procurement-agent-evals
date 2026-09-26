@@ -9,6 +9,7 @@ human approval, and approve/reject/resume them.
 from __future__ import annotations
 
 import argparse
+import json
 import sys
 from pathlib import Path
 
@@ -41,10 +42,60 @@ def cmd_run_all(args: argparse.Namespace) -> None:
     store.close()
 
 
+def _fmt(x) -> str:
+    if x is None:
+        return "?"
+    if isinstance(x, float):
+        return f"{x:,.4f}".rstrip("0").rstrip(".")
+    return str(x)
+
+
+def format_approval(row) -> str:
+    """Render one pending approval so a human can judge it before approving:
+    supplier, every line (item, qty, unit price, line total, catalog
+    deviation), totals, policy flags, the idempotency key and a raw-email
+    excerpt."""
+    p = json.loads(row["payload_json"])
+    ccy = p.get("currency") or "?"
+    out = [
+        f"approval {row['id']}  task={row['task_id']}  kind={row['kind']}",
+        f"  supplier: {p.get('supplier') or '?'}    currency: {ccy}",
+    ]
+    for i, line in enumerate(p.get("lines", []), 1):
+        dev = line.get("deviation_pct")
+        dev_s = f"{dev:+.1f}% vs catalog {line.get('matched_sku')}" if dev is not None else "no catalog price"
+        out.append(
+            f"  {i}. {line.get('description')}: qty {_fmt(line.get('qty'))} x {_fmt(line.get('unit_price'))} {ccy}"
+            f" = {_fmt(line.get('line_total'))} {ccy}  ({dev_s})"
+        )
+    out.append(
+        f"  total: stated {_fmt(p.get('stated_total'))} {ccy}, computed from lines {_fmt(p.get('computed_total'))} {ccy}"
+    )
+    out.append(f"  max catalog deviation: {_fmt(p.get('max_deviation_pct'))}%   policy reason: {p.get('decision_reason')}")
+    flags = p.get("flags", {})
+    out.append(
+        "  flags: "
+        f"injection_regex_hit={flags.get('injection_regex_hit')} "
+        f"conflicting_total={flags.get('conflicting_total')} "
+        f"unmatched_items={flags.get('unmatched_items') or []} "
+        f"missing_fields={flags.get('missing_fields') or []}"
+    )
+    out.append("  note: the injection regex misses paraphrased attacks; read the email excerpt below.")
+    out.append(f"  idempotency_key: {p.get('idempotency_key')}")
+    excerpt = (p.get("raw_email_excerpt") or "").rstrip()
+    suffix = "\n    [... truncated]" if p.get("raw_email_truncated") else ""
+    out.append("  raw email excerpt:\n    " + excerpt.replace("\n", "\n    ") + suffix)
+    return "\n".join(out)
+
+
 def cmd_pending(args: argparse.Namespace) -> None:
     store = Store(args.db)
-    for row in store.pending_approvals():
-        print(f"{row['id']}\ttask={row['task_id']}\tkind={row['kind']}\tcreated={row['created_at']}")
+    rows = store.pending_approvals()
+    if not rows:
+        print("no pending approvals")
+    for row in rows:
+        print(format_approval(row))
+        print()
     store.close()
 
 
