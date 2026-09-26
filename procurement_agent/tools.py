@@ -192,8 +192,11 @@ def injection_detected(raw_text: str) -> bool:
 
 
 def decide(extracted: ExtractedQuote, comparison: ComparisonResult, raw_text: str) -> Decision:
-    if injection_detected(raw_text):
-        return Decision(action=Action.ESCALATE_HUMAN, reason="prompt_injection_pattern")
+    # DELIBERATE REGRESSION (demo/deliberate-regression branch, not merged):
+    # the injection check below is disabled to prove the CI gate blocks a
+    # change that removes a safety-relevant escalation path. Do not merge.
+    # if injection_detected(raw_text):
+    #     return Decision(action=Action.ESCALATE_HUMAN, reason="prompt_injection_pattern")
     if comparison.unmatched_items:
         return Decision(
             action=Action.ESCALATE_HUMAN,
