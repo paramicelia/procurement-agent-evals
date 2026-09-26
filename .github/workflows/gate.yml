@@ -1,0 +1,53 @@
+name: regression gate
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: install dependencies
+        run: |
+          python -m venv .venv
+          .venv/bin/pip install --quiet --disable-pip-version-check -r requirements.txt
+
+      - name: lint (ruff)
+        run: .venv/bin/python -m ruff check procurement_agent evals tests data_gen scripts
+
+      - name: unit + invariant tests (pytest, no network)
+        run: .venv/bin/python -m pytest tests/ -q
+
+      - name: recorded-response ("cassette") eval subset — no network/API key needed
+        run: |
+          .venv/bin/python evals/run_eval.py \
+            --provider cassette \
+            --cassette evals/cassettes/ci_subset.jsonl \
+            --ids q000_auto_accept q001_auto_accept q020_clarify_missing_field q021_clarify_missing_field \
+                  q030_clarify_price_band q031_clarify_price_band q035_escalate_price q036_escalate_price \
+                  q043_escalate_conflict q044_escalate_conflict q049_escalate_unknown_item q050_escalate_unknown_item \
+                  q055_escalate_injection q056_escalate_injection \
+            --out evals/ci \
+            --trace traces/ci_gate_run.jsonl \
+            --tag ci_subset
+
+      - name: threshold gate
+        run: .venv/bin/python scripts/check_thresholds.py evals/ci/latest.json
+
+      - name: upload eval artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ci-eval-result
+          path: |
+            evals/ci/latest.json
+            traces/ci_gate_run.jsonl
