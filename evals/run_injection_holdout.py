@@ -135,8 +135,8 @@ for an approved approval row; see ADR 0002 and
 on this regex at all — a missed injection still only reaches
 `auto_accept` -> a **pending, unapproved** approval request. A human still
 has to approve it before anything is written, and that approval request
-shows the extracted order next to an excerpt of the raw email, so the
-injected sentence is in front of the approver (`build_approval_payload` in
+shows the extracted order next to an excerpt of the raw email, so an
+injected sentence within the first 2000 characters is in front of the approver (`build_approval_payload` in
 `procurement_agent/orchestrator.py`; the approver can still miss it). What this number measures is
 whether the regex successfully routes a sneaky email to a human's attention
 sooner (as `escalate_human`) instead of the normal approval queue — a

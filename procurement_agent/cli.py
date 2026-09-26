@@ -13,7 +13,7 @@ import json
 import sys
 from pathlib import Path
 
-from .orchestrator import resume_after_approval, run_task
+from .orchestrator import ApprovalPayloadMismatchError, resume_after_approval, run_task
 from .providers import get_provider
 from .store import Store
 from .tracing import Tracer
@@ -106,7 +106,12 @@ def cmd_decide(args: argparse.Namespace, approve: bool) -> None:
         print(f"no pending place_order approval for task {args.task_id}", file=sys.stderr)
         sys.exit(1)
     store.decide_approval(approval["id"], approve=approve, decided_by=args.decided_by)
-    result = resume_after_approval(args.task_id, store)
+    try:
+        result = resume_after_approval(args.task_id, store)
+    except ApprovalPayloadMismatchError as exc:
+        print(f"refused: {exc}", file=sys.stderr)
+        store.close()
+        sys.exit(1)
     print(f"{args.task_id}: {result.state}")
     store.close()
 

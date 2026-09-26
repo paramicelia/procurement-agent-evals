@@ -1,6 +1,7 @@
 # Harder eval slice — status: data + harness ready, not yet measured
 
-Added after code review noted that EVALS.md's clean 100% / 98.6% numbers had
+Added after code review noted that EVALS.md's clean numbers (98.6% field extraction; 100% action agreement,
+which is near-circular) had
 no example anywhere of the model getting something wrong for a real reason.
 This file exists to hold that harder, separately-reported slice — it is
 **not yet a measured result**, and this section says exactly why, rather
@@ -43,7 +44,7 @@ also writes `DIR/latest.json`, regardless of `--tag`. The command below
 therefore points `--out` at a *separate* `evals/results_hard/` directory, not
 `evals/results/` — pointing it at the same directory as the main n=61 run
 would silently overwrite `evals/results/latest.json`, the file EVALS.md's
-100%/98.6% headline numbers are generated from. (This is exactly what
+measured numbers are generated from. (This is exactly what
 happened once while building this file; it was caught by `git diff` showing
 EVALS.md's real numbers replaced with `n/a`, and fixed by restoring
 `evals/results/latest.json` from the untouched timestamped copy next to it

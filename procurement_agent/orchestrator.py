@@ -232,7 +232,7 @@ def resume_after_approval(task_id: str, store: Store, tracer: Tracer | None = No
         # nobody approved.
         if payload["idempotency_key"] != idempotency_key(task_id, extracted):
             raise ApprovalPayloadMismatchError(
-                f"task {task_id}: approved payload does not match the current extraction; re-approve"
+                f"task {task_id}: approved payload does not match the current extraction; reject this approval and re-run the task"
             )
         with tracer.span(task_id, "place_order") as span:
             order_id = place_order(

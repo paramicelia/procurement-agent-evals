@@ -50,7 +50,7 @@ does the same for the branch that waits on a human.
 - If this agent grows real branching (e.g. multiple approval types, parallel
   tool calls, sub-agents), the hand-rolled version would need to grow into
   something LangGraph already is. I would revisit this decision at that point,
-  not before — see "what I'd do in production" in the README.
+  not before — see "Production next steps" in the README.
 
 ## Consequence
 

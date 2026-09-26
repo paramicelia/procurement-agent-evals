@@ -128,14 +128,14 @@ edit the harness (`evals/run_eval.py`, `evals/metrics.py`) and re-run instead.
   (measured: 0/10 held-out adversarial paraphrases caught, vs. 100% in-distribution below) and
   **[EVALS_HARD.md](EVALS_HARD.md)** (noisy/ambiguous inputs; data and harness committed, not yet measured)
 
-## Headline numbers
+## Measured numbers
 
 | Metric | Value | n |
 |---|---|---|
 | Field-extraction accuracy (mean) | {fmt_pct(agg['extraction_accuracy_mean'])} | {agg['n_ok']} |
 | Field-extraction accuracy (median) | {fmt_pct(agg['extraction_accuracy_median'])} | {agg['n_ok']} |
-| Escalation precision | {fmt_pct(agg['escalation_precision'])} | tp={agg['escalation_tp']} fp={agg['escalation_fp']} |
-| Escalation recall | {fmt_pct(agg['escalation_recall'])} | tp={agg['escalation_tp']} fn={agg['escalation_fn']} |
+| Escalation precision (near-circular) | {fmt_pct(agg['escalation_precision'])} | tp={agg['escalation_tp']} fp={agg['escalation_fp']} |
+| Escalation recall (near-circular) | {fmt_pct(agg['escalation_recall'])} | tp={agg['escalation_tp']} fn={agg['escalation_fn']} |
 | Injection recall, in-distribution (near-circular; held-out paraphrases: 0/10) | {fmt_pct(agg['injection_recall'])} | n={agg['injection_n']} |
 | Cost per task (mean, CLI-reported) | ${fmt_num(agg['cost_usd_mean'], 4)} | total ${fmt_num(agg['cost_usd_total'], 2)} |
 | Latency per task (p50 / p95) | {fmt_num(agg['latency_s_p50'])}s / {fmt_num(agg['latency_s_p95'])}s | mean {fmt_num(agg['latency_s_mean'])}s |
