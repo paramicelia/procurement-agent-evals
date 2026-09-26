@@ -1,0 +1,35 @@
+{
+  "id": "h010_ambiguous_currency",
+  "category": "ambiguous_currency",
+  "format": "free_text_mixed_currency_label",
+  "currency": "GBP",
+  "has_injection": false,
+  "notes": "line index 1 labeled 'JPY' but priced in the quote's real currency (GBP) \u2014 a realistic supplier mislabel, not resolvable from the text alone.",
+  "ground_truth": {
+    "extracted": {
+      "supplier": "Falcon Precision Parts",
+      "currency": "GBP",
+      "total": 326.75,
+      "items": [
+        {
+          "description": "8mm Aluminum Panel",
+          "qty": 25.0,
+          "unit_price": 12.35
+        },
+        {
+          "description": "M6 Hex Bolt (zinc)",
+          "qty": 200.0,
+          "unit_price": 0.09
+        }
+      ],
+      "missing_fields": []
+    },
+    "comparison_summary": {
+      "unmatched_items": [],
+      "conflicting": false,
+      "max_deviation_pct": 4.27
+    },
+    "action": "auto_accept",
+    "reason": "within_tolerance"
+  }
+}

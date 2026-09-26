@@ -145,3 +145,88 @@ def test_crash_after_approval_before_write_resumes_cleanly(store, monkeypatch):
     result = orchestrator.resume_after_approval("t7", store)
     assert result.state == "order_placed"
     assert store.count_orders_for_task("t7") == 1
+
+
+def test_crash_between_create_approval_and_checkpoint_does_not_duplicate(store, monkeypatch):
+    """Reproduces the bug found in code review: store.create_approval() and
+    the following store.upsert_run(state=STATE_AWAITING_APPROVAL) used to be
+    two separate commits. A crash between them left state='decided', so
+    re-running run_task() after 'restart' re-entered the AUTO_ACCEPT branch
+    and created a SECOND place_order approval row with the same idempotency
+    key. get_approval_for_task() only returns the newest row, so if a human
+    approved the older (orphaned) one, resume_after_approval() would stall on
+    'awaiting_approval' forever even though a human genuinely approved it."""
+    provider = ScriptedProvider([quote_response()])
+
+    real_upsert_run = store.upsert_run
+    calls = {"n": 0}
+
+    def flaky_upsert_run(task_id, **fields):
+        if fields.get("state") == orchestrator.STATE_AWAITING_APPROVAL:
+            calls["n"] += 1
+            if calls["n"] == 1:
+                # The approval row below was already committed by
+                # create_approval(); this checkpoint commit never happens.
+                raise RuntimeError("simulated crash after create_approval, before its checkpoint")
+        return real_upsert_run(task_id, **fields)
+
+    monkeypatch.setattr(store, "upsert_run", flaky_upsert_run)
+
+    with pytest.raises(RuntimeError):
+        orchestrator.run_task("t8", "a clean quote email", store, provider)
+
+    row = store.get_run("t8")
+    assert row["state"] == "decided"  # checkpoint lost, side effect kept
+    assert len(store.pending_approvals()) == 1
+
+    # "restart the process": run_task() re-enters STATE_DECIDED/AUTO_ACCEPT.
+    result = orchestrator.run_task("t8", "a clean quote email", store, provider)
+    assert result.state == "awaiting_approval"
+    assert len(store.pending_approvals()) == 1  # not 2 — no duplicate approval
+
+    approval = store.get_approval_for_task("t8", "place_order")
+    store.decide_approval(approval["id"], approve=True)
+    result2 = orchestrator.resume_after_approval("t8", store)
+    assert result2.state == "order_placed"
+    assert store.count_orders_for_task("t8") == 1
+
+
+def test_crash_between_draft_followup_and_checkpoint_reruns_the_paid_call(store, monkeypatch):
+    """Known, accepted limitation (not fixed here — see LIMITATIONS.md): the
+    REQUEST_CLARIFICATION branch has the same 'side effect, then a separate
+    checkpoint commit' shape as the AUTO_ACCEPT branch above, but for
+    draft_followup (a paid LLM call) instead of create_approval. Unlike the
+    AUTO_ACCEPT case, this does not corrupt any persisted state or create a
+    duplicate row — it just re-runs the LLM call on resume. This test proves
+    that is exactly what happens, so the claim is measured, not assumed."""
+    provider = ScriptedProvider([
+        quote_response(items=[{"description": "M6 Hex Bolt", "qty": 100, "unit_price": None}],
+                       total=None, missing_fields=["unit_price for 'M6 Hex Bolt'"]),
+        "first draft: could you confirm the unit price?",
+        "second draft: could you confirm the unit price?",
+    ])
+
+    real_upsert_run = store.upsert_run
+    calls = {"n": 0}
+
+    def flaky_upsert_run(task_id, **fields):
+        if fields.get("state") == orchestrator.STATE_CLARIFICATION_DRAFTED:
+            calls["n"] += 1
+            if calls["n"] == 1:
+                raise RuntimeError("simulated crash after draft_followup, before its checkpoint")
+        return real_upsert_run(task_id, **fields)
+
+    monkeypatch.setattr(store, "upsert_run", flaky_upsert_run)
+
+    with pytest.raises(RuntimeError):
+        orchestrator.run_task("t9", "quote with a missing price", store, provider)
+
+    row = store.get_run("t9")
+    assert row["state"] == "decided"  # checkpoint lost, draft_followup already ran once
+
+    result = orchestrator.run_task("t9", "quote with a missing price", store, provider)
+    assert result.state == "clarification_drafted"
+    # 1 extract_quote call + 2 draft_followup calls: draft_followup ran a
+    # second time on resume, paying for the LLM call again — confirmed here,
+    # not just asserted in prose.
+    assert len(provider.calls) == 3

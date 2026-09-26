@@ -1,0 +1,40 @@
+{
+  "id": "h008_ambiguous_currency",
+  "category": "ambiguous_currency",
+  "format": "free_text_mixed_currency_label",
+  "currency": "EUR",
+  "has_injection": false,
+  "notes": "line index 2 labeled 'JPY' but priced in the quote's real currency (EUR) \u2014 a realistic supplier mislabel, not resolvable from the text alone.",
+  "ground_truth": {
+    "extracted": {
+      "supplier": "Everline Industrial",
+      "currency": "EUR",
+      "total": 2771.0,
+      "items": [
+        {
+          "description": "Barcode Label Roll (1000 labels)",
+          "qty": 200.0,
+          "unit_price": 6.05
+        },
+        {
+          "description": "22AWG Hookup Wire, 100m spool",
+          "qty": 100.0,
+          "unit_price": 8.31
+        },
+        {
+          "description": "Small Aluminum Heatsink",
+          "qty": 1000.0,
+          "unit_price": 0.73
+        }
+      ],
+      "missing_fields": []
+    },
+    "comparison_summary": {
+      "unmatched_items": [],
+      "conflicting": false,
+      "max_deviation_pct": 2.67
+    },
+    "action": "auto_accept",
+    "reason": "within_tolerance"
+  }
+}

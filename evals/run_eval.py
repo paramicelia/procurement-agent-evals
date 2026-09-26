@@ -19,6 +19,7 @@ import datetime as dt
 import json
 import statistics
 import sys
+import threading
 import time
 from pathlib import Path
 
@@ -209,23 +210,32 @@ def main() -> None:
     tracer = Tracer(args.trace)
     results: list[dict] = []
     spent = {"usd": 0.0}
+    # guarded_run's "check spent, then call the provider, then add to spent"
+    # was a check-then-spend race across ThreadPoolExecutor workers: several
+    # already-dispatched calls could all complete after the cap was reached,
+    # oversubscribing it by up to concurrency-1 calls' worth of spend. This
+    # lock only needs to protect the shared counter, not the (slow) provider
+    # call itself, so it doesn't reduce concurrency.
+    spent_lock = threading.Lock()
 
     print(f"running {len(fixtures)} fixtures through provider={provider.name} "
           f"(concurrency={args.concurrency}, budget cap ${args.max_budget_usd:.2f})")
 
     def guarded_run(item: dict) -> dict:
-        if spent["usd"] >= args.max_budget_usd:
-            return {**{k: None for k in ("id",)}, "id": item["label"]["id"], "skipped_budget": True,
-                    "category": item["label"]["category"], "format": item["label"]["format"],
-                    "has_injection": item["label"]["has_injection"], "error": "skipped: budget cap reached",
-                    "expected_action": item["label"]["ground_truth"]["action"], "predicted_action": "skipped",
-                    "predicted_reason": "", "expected_reason": item["label"]["ground_truth"]["reason"],
-                    "extraction_accuracy": 0.0, "extraction_fields_total": 0, "extraction_fields_correct": 0,
-                    "failure_category": None, "cost_usd": 0.0, "latency_s": 0.0, "wall_s": 0.0,
-                    "model": provider.name, "input_tokens": 0, "output_tokens": 0,
-                    "predicted_extracted": {}, "raw_excerpt": ""}
+        with spent_lock:
+            if spent["usd"] >= args.max_budget_usd:
+                return {**{k: None for k in ("id",)}, "id": item["label"]["id"], "skipped_budget": True,
+                        "category": item["label"]["category"], "format": item["label"]["format"],
+                        "has_injection": item["label"]["has_injection"], "error": "skipped: budget cap reached",
+                        "expected_action": item["label"]["ground_truth"]["action"], "predicted_action": "skipped",
+                        "predicted_reason": "", "expected_reason": item["label"]["ground_truth"]["reason"],
+                        "extraction_accuracy": 0.0, "extraction_fields_total": 0, "extraction_fields_correct": 0,
+                        "failure_category": None, "cost_usd": 0.0, "latency_s": 0.0, "wall_s": 0.0,
+                        "model": provider.name, "input_tokens": 0, "output_tokens": 0,
+                        "predicted_extracted": {}, "raw_excerpt": ""}
         r = run_one(item, provider, tracer)
-        spent["usd"] += r.get("cost_usd") or 0.0
+        with spent_lock:
+            spent["usd"] += r.get("cost_usd") or 0.0
         return r
 
     with concurrent.futures.ThreadPoolExecutor(max_workers=args.concurrency) as ex:

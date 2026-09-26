@@ -89,6 +89,9 @@ edit the harness (`evals/run_eval.py`, `evals/metrics.py`) and re-run instead.
 - Backend: `{payload.get('provider')}` (see `docs/adr/0003-provider-interface-and-default-backend.md`)
 - n = {agg['n']} synthetic fixtures ({agg['n_ok']} completed, {agg['n_errors']} raised an error)
 - Full raw per-item results: `evals/results/{results_path.name}`
+- Related, separately-reported slices: **[EVALS_INJECTION_HOLDOUT.md](EVALS_INJECTION_HOLDOUT.md)**
+  (measured: 0/10 held-out adversarial paraphrases caught, vs. 100% in-distribution below) and
+  **[EVALS_HARD.md](EVALS_HARD.md)** (noisy/ambiguous inputs; data and harness committed, live run pending)
 
 ## Headline numbers
 

@@ -1,0 +1,8 @@
+{
+  "seed": 9001,
+  "total": 12,
+  "by_category": {
+    "ambiguous_currency": 6,
+    "noisy_ocr": 6
+  }
+}

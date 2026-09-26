@@ -118,17 +118,34 @@ No secret is ever hardcoded, printed, or committed; see `docs/adr/0003`.
 ## Measured results (n=61, default backend)
 
 Full table, failure taxonomy, and concrete examples: **[EVALS.md](EVALS.md)**
-— generated, not hand-typed; **read [LIMITATIONS.md](LIMITATIONS.md) before
-citing any of these numbers**, especially the 100% action-accuracy figure.
+— generated, not hand-typed.
+
+> **Before citing the 100% figures below**: they're from a clean, in-distribution
+> benchmark, not an adversarial or held-out one. Two harder, separately-reported
+> slices exist specifically because a clean 100% with no example of the model
+> failing is itself a red flag:
+> - **[EVALS_INJECTION_HOLDOUT.md](EVALS_INJECTION_HOLDOUT.md)** — measured:
+>   the same injection detector catches **0/10 (0.0%)** paraphrased,
+>   lexically-disjoint adversarial phrasings, vs. 100% on the in-distribution
+>   set below. Read it before trusting the 100% injection-recall row.
+> - **[EVALS_HARD.md](EVALS_HARD.md)** — data and harness are committed
+>   (noisy OCR-style text, ambiguous multi-currency line items); the live
+>   run is **not yet measured** (blocked on the default backend's session
+>   limit at the time of this fix round) — see that file for exactly why,
+>   rather than a number filled in either way.
+>
+> Read [LIMITATIONS.md](LIMITATIONS.md) for what the numbers below do and
+> don't prove.
 
 | Metric | Value |
 |---|---|
+| Cost per task (mean) | $0.0078 |
+| Latency per task (p50 / p95) | 6.3s / 11.3s |
 | Action accuracy | 100.0% (n=61) |
 | Field-extraction accuracy (mean) | 98.6% |
 | Escalation precision / recall | 100.0% / 100.0% |
-| Injection recall | 100.0% (n=6) |
-| Cost per task (mean) | $0.0078 |
-| Latency per task (p50 / p95) | 6.3s / 11.3s |
+| Injection recall (in-distribution, n=6) | 100.0% |
+| Injection recall (held-out paraphrases, n=10) | **0.0%** — see EVALS_INJECTION_HOLDOUT.md |
 
 Regression gate: **[.github/workflows/gate.yml](.github/workflows/gate.yml)**
 runs ruff + pytest + a 14-fixture recorded-cassette eval subset with fixed
@@ -158,7 +175,13 @@ orchestrator internals):
   otherwise perfect and would have auto-accepted;
 - **resume after a crash continues, not restarts** — a simulated crash
   between steps is followed by a resumed run that does not re-call
-  `extract_quote` (the paid step) a second time.
+  `extract_quote` (the paid step) a second time;
+- **the approval-creation checkpoint is also crash-safe** — a simulated
+  crash between `create_approval` and its own checkpoint no longer produces
+  a duplicate `place_order` approval on resume (found by code review, fixed,
+  regression-tested). The analogous boundary around `draft_followup` is
+  tested too, but left un-fixed on purpose since a crash there only re-runs
+  one cheap LLM call rather than corrupting state — see LIMITATIONS.md.
 
 ## What I'd do in production
 
@@ -176,8 +199,11 @@ orchestrator internals):
 - **A held-out, human-labeled eval set**, separate from the one used to pick
   the 8%/20% thresholds, with a second labeler and inter-rater agreement —
   see LIMITATIONS.md for why the current n=61 single-labeler set isn't that.
-- **Adversarial red-teaming of the injection detector** by someone who
-  didn't write the ~10 regex patterns being tested against.
+- **Real adversarial red-teaming of the injection detector** by someone who
+  didn't write the ~10 regex patterns being tested against — a first, small
+  step in that direction is in EVALS_INJECTION_HOLDOUT.md (0/10 held-out
+  paraphrases caught), but 10 phrases from the same person who wrote the
+  regex is still a long way from independent red-teaming.
 
 ## How this was built
 

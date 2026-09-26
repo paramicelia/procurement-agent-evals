@@ -1,0 +1,30 @@
+{
+  "id": "h009_ambiguous_currency",
+  "category": "ambiguous_currency",
+  "format": "free_text_mixed_currency_label",
+  "currency": "USD",
+  "has_injection": false,
+  "notes": "line index 0 labeled 'JPY' but priced in the quote's real currency (USD) \u2014 a realistic supplier mislabel, not resolvable from the text alone.",
+  "ground_truth": {
+    "extracted": {
+      "supplier": "Wavelength Electronics",
+      "currency": "USD",
+      "total": 630.0,
+      "items": [
+        {
+          "description": "Rubber Gasket 40mm",
+          "qty": 1000.0,
+          "unit_price": 0.63
+        }
+      ],
+      "missing_fields": []
+    },
+    "comparison_summary": {
+      "unmatched_items": [],
+      "conflicting": false,
+      "max_deviation_pct": 3.4
+    },
+    "action": "auto_accept",
+    "reason": "within_tolerance"
+  }
+}

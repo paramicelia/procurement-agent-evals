@@ -117,6 +117,29 @@ class Store:
     # ---- approval queue ----------------------------------------------------
 
     def create_approval(self, task_id: str, kind: str, payload: dict) -> str:
+        """Idempotent per (task_id, kind).
+
+        run_task()'s AUTO_ACCEPT branch calls this and then checkpoints the
+        run to STATE_AWAITING_APPROVAL in a *separate* commit (see
+        orchestrator.py). If the process crashes between those two commits,
+        the run row is still 'decided' on restart, so run_task() re-enters
+        this branch and calls create_approval() a second time. Without this
+        check that used to insert a second 'place_order' approval row with
+        the same idempotency key; get_approval_for_task() only ever returns
+        the newest one (ORDER BY created_at DESC), so if a human approved
+        the older (now-orphaned) row, resume_after_approval() would see the
+        newer row still pending and stall forever even though a human had
+        genuinely approved the order. Returning the existing row instead of
+        inserting a new one makes the whole (side effect, checkpoint) pair
+        safe to retry from either side. See
+        tests/test_invariants.py::test_crash_between_create_approval_and_checkpoint_does_not_duplicate.
+        """
+        existing = self._conn.execute(
+            "SELECT id FROM approvals WHERE task_id = ? AND kind = ? ORDER BY created_at DESC LIMIT 1",
+            (task_id, kind),
+        ).fetchone()
+        if existing is not None:
+            return existing["id"]
         approval_id = str(uuid.uuid4())
         self._conn.execute(
             "INSERT INTO approvals (id, task_id, kind, payload_json, status, created_at) "

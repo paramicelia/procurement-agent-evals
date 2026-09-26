@@ -6,6 +6,18 @@ function returns or the next step starts, so run_task() is safe to call
 again after a crash: it resumes from the last completed step instead of
 re-running everything (in particular, extract_quote — the paid LLM call —
 is never re-run once its result is checkpointed).
+
+Caveat, found by code review and now covered by a test either way (see
+tests/test_invariants.py): the AUTO_ACCEPT branch below calls
+store.create_approval() and *then* checkpoints the state change in a
+separate commit. A crash between those two commits used to create a
+duplicate approval row on resume; create_approval() is now idempotent per
+(task_id, kind), so that boundary is safe. The REQUEST_CLARIFICATION branch
+has the same two-commits shape around draft_followup() (a paid LLM call)
+and is NOT fixed the same way: a crash there will re-run draft_followup() on
+resume. That does not corrupt any state or duplicate a row — it only pays
+for the LLM call again — so it is documented as a known limitation (see
+LIMITATIONS.md) rather than fixed here.
 """
 from __future__ import annotations
 

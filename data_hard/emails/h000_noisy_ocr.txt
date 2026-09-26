@@ -1,0 +1,11 @@
+Northwind Fasteners
+Quotation No. Q-6965
+------------------------------------------------
+Description                     Qty   Unit Price
+JST 4-Pin Connector                 1000          0.15
+
+Sub Total ................. see above
+Tax (0%) ................... 0.00
+TOTAL .................... GBP 150.00
+
+Page 1 of 1

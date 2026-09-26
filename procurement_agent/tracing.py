@@ -7,6 +7,7 @@ traces stay safe to share even though the synthetic corpus is fine either way.
 from __future__ import annotations
 
 import json
+import threading
 import time
 import uuid
 from dataclasses import dataclass, field
@@ -84,13 +85,22 @@ class Tracer:
         self.path.parent.mkdir(parents=True, exist_ok=True)
         self.run_id = run_id or uuid.uuid4().hex[:12]
         self._fh = open(self.path, "a")
+        # evals/run_eval.py shares one Tracer across a ThreadPoolExecutor
+        # (--concurrency workers); without this lock, two threads' writes to
+        # the same file handle could interleave mid-line and corrupt the
+        # JSONL trace file. Not just a hypothetical: this only relied on
+        # CPython's GIL making a single buffered write "usually" atomic,
+        # which was never guaranteed and was untested.
+        self._lock = threading.Lock()
 
     def span(self, task_id: str, tool: str) -> _Span:
         return _Span(self, task_id, tool)
 
     def _write(self, rec: dict) -> None:
-        self._fh.write(json.dumps(rec) + "\n")
-        self._fh.flush()
+        line = json.dumps(rec) + "\n"
+        with self._lock:
+            self._fh.write(line)
+            self._fh.flush()
 
     def close(self) -> None:
         self._fh.close()

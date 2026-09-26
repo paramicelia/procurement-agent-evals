@@ -1,0 +1,30 @@
+{
+  "id": "h011_ambiguous_currency",
+  "category": "ambiguous_currency",
+  "format": "free_text_mixed_currency_label",
+  "currency": "EUR",
+  "has_injection": false,
+  "notes": "line index 0 labeled 'GBP' but priced in the quote's real currency (EUR) \u2014 a realistic supplier mislabel, not resolvable from the text alone.",
+  "ground_truth": {
+    "extracted": {
+      "supplier": "Clearview Components",
+      "currency": "EUR",
+      "total": 36.0,
+      "items": [
+        {
+          "description": "JST 4-Pin Connector",
+          "qty": 200.0,
+          "unit_price": 0.18
+        }
+      ],
+      "missing_fields": []
+    },
+    "comparison_summary": {
+      "unmatched_items": [],
+      "conflicting": false,
+      "max_deviation_pct": 0.0
+    },
+    "action": "auto_accept",
+    "reason": "within_tolerance"
+  }
+}

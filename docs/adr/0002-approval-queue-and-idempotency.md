@@ -57,3 +57,20 @@ no approval and asserts it raises).
 - If a second write-tool is ever added (e.g. `cancel_order`), it must go
   through the same `Store`-owned gate — that's the pattern to extend, not
   re-derive.
+
+## Addendum (code review, 2026-09-26): the approval-creation checkpoint was not atomic
+
+The original version of this design checked out under every test that
+existed at the time, but missed one boundary: `orchestrator.run_task()`
+calls `store.create_approval()` and then checkpoints the run to
+`awaiting_approval` in a *separate* commit. A crash between those two
+commits left the run row at `decided`, so a restart re-entered the same
+branch and called `create_approval()` again — creating a second
+`place_order` approval row with the same idempotency key, silently, with no
+error. `Store.get_approval_for_task` always returns the newest row, so a
+human approving the older (now-orphaned) one would never see their approval
+take effect. Fix: `create_approval` is now idempotent per `(task_id, kind)` —
+it returns the existing row instead of inserting a duplicate. See
+`tests/test_invariants.py::test_crash_between_create_approval_and_checkpoint_does_not_duplicate`
+and `LIMITATIONS.md`'s "About crash-resume" section for the analogous,
+deliberately-not-fixed case around `draft_followup`.

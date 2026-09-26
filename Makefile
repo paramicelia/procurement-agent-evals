@@ -1,4 +1,4 @@
-.PHONY: venv install data test lint eval report trace gate demo clean
+.PHONY: venv install data test lint eval eval-injection-holdout report trace gate demo clean
 
 VENV := .venv/bin
 
@@ -20,6 +20,13 @@ lint:
 eval:
 	$(VENV)/python evals/run_eval.py --provider claude-cli --model haiku --effort low --concurrency 5
 	$(VENV)/python evals/render_report.py evals/results/latest.json EVALS.md
+
+eval-injection-holdout:
+	# No LLM, no network: pure regex/deterministic-policy measurement against
+	# a held-out, lexically-disjoint set of injection paraphrases. See
+	# EVALS_INJECTION_HOLDOUT.md.
+	$(VENV)/python data_gen/generate_injection_holdout.py --out-dir data_holdout_injection --seed 4242
+	$(VENV)/python evals/run_injection_holdout.py
 
 eval-cassette:
 	$(VENV)/python evals/run_eval.py --provider cassette --cassette evals/cassettes/ci_subset.jsonl \

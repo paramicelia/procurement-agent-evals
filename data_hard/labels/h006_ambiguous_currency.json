@@ -1,0 +1,35 @@
+{
+  "id": "h006_ambiguous_currency",
+  "category": "ambiguous_currency",
+  "format": "free_text_mixed_currency_label",
+  "currency": "GBP",
+  "has_injection": false,
+  "notes": "line index 0 labeled 'EUR' but priced in the quote's real currency (GBP) \u2014 a realistic supplier mislabel, not resolvable from the text alone.",
+  "ground_truth": {
+    "extracted": {
+      "supplier": "Delta Components GmbH",
+      "currency": "GBP",
+      "total": 44.0,
+      "items": [
+        {
+          "description": "JST 4-Pin Connector",
+          "qty": 25.0,
+          "unit_price": 0.16
+        },
+        {
+          "description": "100uF Electrolytic Capacitor",
+          "qty": 500.0,
+          "unit_price": 0.08
+        }
+      ],
+      "missing_fields": []
+    },
+    "comparison_summary": {
+      "unmatched_items": [],
+      "conflicting": false,
+      "max_deviation_pct": 4.0
+    },
+    "action": "auto_accept",
+    "reason": "within_tolerance"
+  }
+}

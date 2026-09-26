@@ -12,3 +12,4 @@ __pycache__/
 /traces/ci_gate_run.jsonl
 /traces/eval_run.jsonl
 /traces/run.jsonl
+/traces/hard_slice_eval.jsonl

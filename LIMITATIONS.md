@@ -20,9 +20,25 @@ a general claim about "how good this agent is." Specifically:
   regex injection patterns) is actually sound. It encodes my/the agent's
   judgment call, not a domain expert's.
 - **One model family, one provider path.** Every number is Claude Haiku via
-  the local CLI (`--effort low`). No comparison against another model, no
-  adversarial red-teaming of the injection detector beyond the ~10 patterns
-  baked into the synthetic data.
+  the local CLI (`--effort low`). No comparison against another model.
+- **Injection recall was near-circular; it's now also measured, and it's
+  bad.** The in-distribution 100% (n=6) figure is scored against phrases
+  written by the same person, in the same session, as the regex being tested
+  — disclosed here from the start. What was missing was an actual adversarial
+  number instead of just a caveat. **[EVALS_INJECTION_HOLDOUT.md](EVALS_INJECTION_HOLDOUT.md)**
+  now reports it: **0/10 (0.0%)** held-out, lexically-disjoint paraphrases of
+  the same underlying attacks are caught by the regex. Every miss silently
+  results in `auto_accept`, not a benign unlabeled row. Read that file's
+  "what this does NOT mean" section before treating this as a write-safety
+  gap — it isn't one (see "About the write-safety claims specifically"
+  below) — but it is a real, currently weak capability, not a disclosed-and-
+  therefore-fine one.
+- **A harder eval slice exists but isn't measured yet.** `data_hard/` (noisy
+  OCR-style text, ambiguous multi-currency line items) and the harness to
+  run it are committed; the one live attempt hit the default backend's
+  session limit. See **[EVALS_HARD.md](EVALS_HARD.md)** for exactly what's
+  pending and why — treat any harder-eval number you don't find generated
+  in that file as not having happened yet.
 - **A generator artifact, disclosed rather than hidden**: 5 of 61 fixtures
   don't literally state a currency anywhere in the rendered text (when both
   the unit price and the total are missing, the template never has a reason
@@ -52,6 +68,29 @@ a general claim about "how good this agent is." Specifically:
   anywhere in this repo, by design, not as an oversight.
 - **Single-currency-per-quote assumption.** The comparator does not handle
   an email that quotes different line items in different currencies.
+
+## About crash-resume, specifically
+
+- Found in code review, now fixed and tested: `store.create_approval()` and
+  the checkpoint that follows it (`upsert_run(state=awaiting_approval)`) used
+  to be two separate SQLite commits. A crash between them left the run row
+  at `state='decided'`, so restarting re-entered the AUTO_ACCEPT branch and
+  created a **second** `place_order` approval row with the same idempotency
+  key; since `get_approval_for_task` returns only the newest row, an approval
+  of the older (orphaned) one would have stalled `resume_after_approval`
+  forever. `create_approval` is now idempotent per `(task_id, kind)` — see
+  `tests/test_invariants.py::test_crash_between_create_approval_and_checkpoint_does_not_duplicate`.
+- **Not fixed, by choice, and now measured rather than assumed**: the
+  REQUEST_CLARIFICATION branch has the identical "side effect, then a
+  separate checkpoint" shape around `draft_followup` (a paid LLM call,
+  instead of `create_approval`). A crash between them re-runs `draft_followup`
+  on resume — confirmed by
+  `test_crash_between_draft_followup_and_checkpoint_reruns_the_paid_call`.
+  Unlike the approval case this cannot corrupt state or double-write
+  anything (there is nothing downstream of a draft but a return value); it
+  only pays for one extra cheap LLM call on the rare crash-during-drafting
+  path, so it's left as-is rather than adding a second special case to
+  `orchestrator.py` for it.
 
 ## About the write-safety claims specifically
 
